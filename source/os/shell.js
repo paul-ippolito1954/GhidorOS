@@ -52,7 +52,9 @@ var TSOS;
             //whereami
             sc = new TSOS.ShellCommand(this.shellWhereami, "whereami", " - Displays current location");
             this.commandList[this.commandList.length] = sc;
+            //date
             sc = new TSOS.ShellCommand(this.shellDate, "date", " - Displays current date and time");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
