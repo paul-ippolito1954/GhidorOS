@@ -85,6 +85,12 @@ module TSOS {
 								   " - Displays current location");
 			this.commandList[this.commandList.length] = sc;
 
+			//date
+			sc = new ShellCommand(this.shellDate,
+			                       "date",
+								   " - Displays current date and time");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -312,6 +318,15 @@ module TSOS {
 
 		public shellWhereami(args){
 		    _StdOut.putText("You're in a room, staring blankly at a screen.");
+		}
+
+		public shellDate(args){
+		     _StdOut.putText("The current date and time are: ");
+		}
+
+		public shellCombust(args){
+		     _StdOut.putText("Engaging combustible lemons!");
+			 _StdOut.putText("Shutting down...Critical error...");
 		}
     }
 }
