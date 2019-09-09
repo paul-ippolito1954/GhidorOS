@@ -79,6 +79,12 @@ module TSOS {
                                   "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
 
+			//whereami
+			sc = new ShellCommand(this.shellWhereami,
+			                       "whereami",
+								   " - Displays current location");
+			this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -304,5 +310,8 @@ module TSOS {
             }
         }
 
+		public shellWhereami(args){
+		    _StdOut.putText("You're in a room, staring blankly at a screen.");
+		}
     }
 }
