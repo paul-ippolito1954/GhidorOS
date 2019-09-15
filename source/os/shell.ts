@@ -321,7 +321,7 @@ module TSOS {
 		}
 
 		public shellDate(args){
-		     _StdOut.putText("The current date and time are: ");
+		     _StdOut.putText("The current date and time are: Today and right now");
 		}
 
 		public shellCombust(args){

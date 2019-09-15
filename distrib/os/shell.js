@@ -268,7 +268,7 @@ var TSOS;
             _StdOut.putText("You're in a room, staring blankly at a screen.");
         }
         shellDate(args) {
-            _StdOut.putText("The current date and time are: ");
+            _StdOut.putText("The current date and time are: Today and right now");
         }
         shellCombust(args) {
             _StdOut.putText("Engaging combustible lemons!");
