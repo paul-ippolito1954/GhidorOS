@@ -22,6 +22,7 @@ module TSOS {
         public commandList = [];
         public curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
         public apologies = "[sorry]";
+        public status = "Running";
 
         constructor() {
         }
@@ -101,6 +102,18 @@ module TSOS {
             sc = new ShellCommand(this.shellBSOD,
                                     "bsod",
                                     " - does bluescreen of death error");
+            this.commandList[this.commandList.length] = sc;
+
+            //load
+            sc = new ShellCommand(this.shellLoad,
+                                    "load",
+                                    " - Loads and validates user input");
+            this.commandList[this.commandList.length] = sc;
+
+            // status
+            sc = new ShellCommand(this.shellStatus,
+                "status",
+                "<string> - Set status message.");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -283,7 +296,11 @@ module TSOS {
                         break;
                     
                     case "load":
-                        _StdOut.putText("");
+                        _StdOut.putText("Loads and validates hex input from User Program Input");
+                        break;
+                    
+                    case "status":
+                        _StdOut.putText("Status <string> sets the status message on the task bar.");
                         break;
 
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
@@ -336,23 +353,61 @@ module TSOS {
             }
         }
 
-		public shellWhereami(args){
+		public shellWhereami(){
 		    _StdOut.putText("You're in a room, staring blankly at a screen.");
 		}
 
-		public shellDate(args){
+		public shellDate(){
 		     _StdOut.putText("The current date and time are: Today and right now");
 		}
 
-		public shellCombust(args){
+		public shellCombust(){
              _StdOut.putText("Engaging combustible lemons!");
              _StdOut.advanceLine();
              _StdOut.putText("Shutting down...Critical error...");
              _Kernel.krnShutdown();
         }
         
-        public shellBSOD(args){
+        public shellBSOD(){
             _Kernel.krnTrapError("Error caused by YOU");
+        }
+
+        public shellLoad(){
+
+            // Load text in the User Program Input textarea
+            var input = ((document.getElementById("taProgramInput") as HTMLInputElement).value);
+            var valid = true;
+            _StdOut.putText("Loading...");
+            _StdOut.advanceLine();
+
+            // tests input against regex for hex, displays error for specific characters
+            // or if no text/valid hex is entered
+            for(var i = 0; i < input.length; i++) {
+                if (input.charAt(i).match("-?[0-9a-fA-F\\s]+")) {
+                    valid = true;
+                } else {
+                    _StdOut.putText("Character " + input.charAt(i) + " at position " + i + " is not valid hex input.");
+                    valid = false;
+                    break;
+                }
+            }
+            // No input? That's an error
+            if(input == "") {
+                valid = false;
+                _StdOut.putText("No text entered, not valid hex input.");
+            }
+            // user actually put in valid hex
+            if(valid)
+                _StdOut.putText("Valid hex input.");
+        }
+
+        public shellStatus(args){
+            //set status equal to input
+            this.status = args;
+            //print update that status has been changed
+            _StdOut.putText("Status set to " + args);
+            //update status on host
+            document.getElementById("status").innerHTML = "Status: " + this.status + " | ";
         }
     }
 }

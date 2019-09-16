@@ -45,6 +45,9 @@ module TSOS {
             // ... more?
             //
 
+            //set status
+            document.getElementById("status").innerHTML = "Status: Running | ";
+
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
             this.krnTrace("Enabling the interrupts.");
             this.krnEnableInterrupts();
@@ -169,6 +172,14 @@ module TSOS {
                     Control.hostLog(msg, "OS");
                 }
              }
+
+             //create displayDate and displayTime to get date and time
+            var displayDate = new Date().toLocaleDateString();
+            var displayTime = new Date();
+
+            //Update time in task bar
+            document.getElementById("time").innerHTML = "Time: " + displayDate + " " + displayTime.getHours()
+                + ":" + displayTime.getMinutes() + ":" + displayTime.getSeconds();
         }
 
         public krnTrapError(msg) {
