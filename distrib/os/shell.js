@@ -58,6 +58,9 @@ var TSOS;
             //combust
             sc = new TSOS.ShellCommand(this.shellCombust, "combust", " - Combustible Lemons");
             this.commandList[this.commandList.length] = sc;
+            //BSOD
+            sc = new TSOS.ShellCommand(this.shellBSOD, "bsod", " - does bluescreen of death error");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -216,6 +219,9 @@ var TSOS;
                     case "date":
                         _StdOut.putText("Date displays the current date and time.");
                         break;
+                    case "bsod":
+                        _StdOut.putText("Forces bluescreen trap error.");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -278,6 +284,9 @@ var TSOS;
             _StdOut.advanceLine();
             _StdOut.putText("Shutting down...Critical error...");
             _Kernel.krnShutdown();
+        }
+        shellBSOD(args) {
+            _Kernel.krnTrapError("Error caused by YOU");
         }
     }
     TSOS.Shell = Shell;

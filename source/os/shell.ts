@@ -95,7 +95,13 @@ module TSOS {
             sc = new ShellCommand(this.shellCombust,
                                     "combust",
                                     " - Combustible Lemons");
-            this.commandList[this.commandList.length]= sc;
+            this.commandList[this.commandList.length] = sc;
+
+            //BSOD
+            sc = new ShellCommand(this.shellBSOD,
+                                    "bsod",
+                                    " - does bluescreen of death error");
+            this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -270,7 +276,11 @@ module TSOS {
 
 					case "date":
 					     _StdOut.putText("Date displays the current date and time.");
-						 break;
+                         break;
+                    
+                    case "bsod":
+                        _StdOut.putText("Forces bluescreen trap error.")
+                        break;
 
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
@@ -335,6 +345,10 @@ module TSOS {
              _StdOut.advanceLine();
              _StdOut.putText("Shutting down...Critical error...");
              _Kernel.krnShutdown();
-		}
+        }
+        
+        public shellBSOD(args){
+            _Kernel.krnTrapError("Error caused by YOU");
+        }
     }
 }

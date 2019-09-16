@@ -25,17 +25,17 @@ module TSOS {
             this.resetXY();
         }
 
-        private clearScreen(): void {
+        public clearScreen(): void {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
         }
 
-        private clearLine(): void {
+        public clearLine(): void {
             _DrawingContext.clearRect(0, this.currentYPosition - (_DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize)), _Canvas.width, _Canvas.height);
             this.currentXPosition = 0;
         }
 
-        private resetXY(): void {
+        public resetXY(): void {
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
         }
