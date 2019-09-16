@@ -281,6 +281,10 @@ module TSOS {
                     case "bsod":
                         _StdOut.putText("Forces bluescreen trap error.")
                         break;
+                    
+                    case "load":
+                        _StdOut.putText("");
+                        break;
 
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:

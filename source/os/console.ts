@@ -25,7 +25,7 @@ module TSOS {
             this.resetXY();
         }
 
-        public clearScreen(): void {
+        private clearScreen(): void {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
         }
 
@@ -35,7 +35,7 @@ module TSOS {
             this.currentXPosition = 0;
         }
 
-        public resetXY(): void {
+        private resetXY(): void {
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
         }

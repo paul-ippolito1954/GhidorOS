@@ -152,8 +152,8 @@ var TSOS;
         }
         krnTrapError(msg) {
             //clear the screen, reset the position, and print text at top
-            _Console.clearScreen();
-            _Console.resetXY();
+            _StdOut.clearScreen();
+            _StdOut.resetXY();
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
             _DrawingContext.fillStyle = 'blue';
