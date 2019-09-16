@@ -21,7 +21,8 @@ module TSOS {
                     public arrowValue = -1,
                     public tabs = 0,
                     public storeInput = [],
-                    public storeCmd = []) {
+                    public storeCmd = [],
+                    public storeText = "") {
         }
 
         public init(): void {
@@ -78,7 +79,7 @@ module TSOS {
                         _StdOut.putText(this.storeInput[this.arrowValue]);
                     }
                 } else if (chr === String.fromCharCode(40)) { //down arrow
-                    //don't allow to navigate past 0
+                    //don't allow to navigate past 0 in array
                     if(this.arrowValue > 0) {
                         //decrease position in array, clear the line, and print out the input value
                         this.arrowValue--;
@@ -119,11 +120,38 @@ module TSOS {
             // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
             //         Consider fixing that.
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
+                this.storeText = text;
+                //array to store lines that will be moved
+                var storeLines = [];
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                // if text would leave canvas
+                if(offset + this.currentXPosition > _Canvas.width - 20){
+
+                    //loop through all the text
+                    for(var i = 0; i < text.length; i++){
+
+                        // convert the offset into the spliced text
+                        var spliceOffset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text.slice(0, i));
+                        
+                        // put both the sliced and pre sliced text to the array and reset X position
+                        if (this.currentXPosition + spliceOffset > _Canvas.width - 20) {
+                            storeLines.push(text.slice(0, i - 1));
+                            text = text.slice(i - 1);
+                            storeLines.push(text);
+                            this.currentXPosition = 0;
+                        }
+                    }
+                    //print array lines with line break
+                    for (var i = 0; i < storeLines.length - 1; i++) {
+                        this.putText(storeLines[i]);
+                        this.advanceLine();
+                    }
+                }
+
+                //draw rest of text
+                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
                 this.currentXPosition = this.currentXPosition + offset;
+
             }
          }
 
