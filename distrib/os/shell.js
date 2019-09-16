@@ -55,6 +55,9 @@ var TSOS;
             //date
             sc = new TSOS.ShellCommand(this.shellDate, "date", " - Displays current date and time");
             this.commandList[this.commandList.length] = sc;
+            //combust
+            sc = new TSOS.ShellCommand(this.shellCombust, "combust", " - Combustible Lemons");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -208,7 +211,7 @@ var TSOS;
                         _StdOut.putText("whereami displays your current location");
                         break;
                     case "combust":
-                        _StdOut.putText("Combust engages combustible lemons. Its shutdown but with pizzaz.");
+                        _StdOut.putText("Combust engages combustible lemons. I wouldn't if I were you...");
                         break;
                     case "date":
                         _StdOut.putText("Date displays the current date and time.");
@@ -272,7 +275,9 @@ var TSOS;
         }
         shellCombust(args) {
             _StdOut.putText("Engaging combustible lemons!");
+            _StdOut.advanceLine();
             _StdOut.putText("Shutting down...Critical error...");
+            _Kernel.krnShutdown();
         }
     }
     TSOS.Shell = Shell;

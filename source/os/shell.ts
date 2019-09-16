@@ -91,6 +91,12 @@ module TSOS {
 								   " - Displays current date and time");
             this.commandList[this.commandList.length] = sc;
 
+            //combust
+            sc = new ShellCommand(this.shellCombust,
+                                    "combust",
+                                    " - Combustible Lemons");
+            this.commandList[this.commandList.length]= sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -259,7 +265,7 @@ module TSOS {
 						 break;
 
 					case "combust":
-					     _StdOut.putText("Combust engages combustible lemons. Its shutdown but with pizzaz.");
+					     _StdOut.putText("Combust engages combustible lemons. I wouldn't if I were you...");
 						 break;
 
 					case "date":
@@ -325,8 +331,10 @@ module TSOS {
 		}
 
 		public shellCombust(args){
-		     _StdOut.putText("Engaging combustible lemons!");
-			 _StdOut.putText("Shutting down...Critical error...");
+             _StdOut.putText("Engaging combustible lemons!");
+             _StdOut.advanceLine();
+             _StdOut.putText("Shutting down...Critical error...");
+             _Kernel.krnShutdown();
 		}
     }
 }

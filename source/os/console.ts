@@ -29,6 +29,12 @@ module TSOS {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
         }
 
+        private clearLine(): void {
+            _DrawingContext.clearRect(0, this.currentYPosition - (_DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize)), _Canvas.width, _Canvas.height);
+            this.currentXPosition = 0;
+        }
+
         private resetXY(): void {
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
@@ -45,7 +51,10 @@ module TSOS {
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
-                } else {
+                } else if (chr == String.fromCharCode(8)){ //backspace
+                    this.backspace();
+                }
+                else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
@@ -103,6 +112,12 @@ module TSOS {
                 _DrawingContext.putImageData(getDisplayedText, 0, -lineHeight);
             }
             
+        }
+
+        public backspace(): void {
+            this.buffer = this.buffer.substring(0, this.buffer.length - 1);
+            this.clearLine();
+            _StdOut.putText( _OsShell.promptStr + this.buffer);
         }
     }
  }

@@ -24,6 +24,11 @@ var TSOS;
         clearScreen() {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
         }
+        clearLine() {
+            _DrawingContext.clearRect(0, this.currentYPosition - (_DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize)), _Canvas.width, _Canvas.height);
+            this.currentXPosition = 0;
+        }
         resetXY() {
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
@@ -39,6 +44,9 @@ var TSOS;
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
+                }
+                else if (chr == String.fromCharCode(8)) { //backspace
+                    this.backspace();
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -90,6 +98,11 @@ var TSOS;
                 //redraw the canvas with the displayed text
                 _DrawingContext.putImageData(getDisplayedText, 0, -lineHeight);
             }
+        }
+        backspace() {
+            this.buffer = this.buffer.substring(0, this.buffer.length - 1);
+            this.clearLine();
+            _StdOut.putText(_OsShell.promptStr + this.buffer);
         }
     }
     TSOS.Console = Console;
