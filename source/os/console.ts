@@ -17,7 +17,11 @@ module TSOS {
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
                     public currentYPosition = _DefaultFontSize,
-                    public buffer = "") {
+                    public buffer = "",
+                    public arrowValue = -1,
+                    public tabs = 0,
+                    public storeInput = [],
+                    public storeCmd = []) {
         }
 
         public init(): void {
@@ -46,14 +50,54 @@ module TSOS {
                 var chr = _KernelInputQueue.dequeue();
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { //     Enter key
+
+                    // check for arrow nav
+                    if(this.arrowValue > -1){
+                        this.buffer += this.storeInput[this.arrowValue];
+                        this.arrowValue = -1;
+                    }
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
+                    // add to storeInput for arrow navigation
+                    this.storeInput.unshift(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
                 } else if (chr == String.fromCharCode(8)){ //backspace
                     this.backspace();
-                }
+                } else if (chr == String.fromCharCode(9)){ //tab
+                    this.complete(this.buffer);
+                    this.tabs++;
+                } else if (chr == String.fromCharCode(38)){
+                    //if there are input values left in array, allow to keep going
+                    if(this.arrowValue < this.storeInput.length - 1) {
+                        //increase position in array, clear the line, and print out the input value
+                        this.arrowValue++;
+                        this.clearLine();
+                        _StdOut.putText(_OsShell.promptStr);
+                        _StdOut.putText(this.storeInput[this.arrowValue]);
+                    }
+                } else if (chr === String.fromCharCode(40)) { //down arrow
+                    //don't allow to navigate past 0
+                    if(this.arrowValue > 0) {
+                        //decrease position in array, clear the line, and print out the input value
+                        this.arrowValue--;
+                        this.clearLine();
+                        _StdOut.putText(_OsShell.promptStr);
+                        _StdOut.putText(this.storeInput[this.arrowValue]);
+                    }
+                //handle unshifted special characters
+                } else if (chr === String.fromCharCode(187)){
+                    _StdOut.putText("=");
+                } else if (chr === String.fromCharCode(188)){
+                    _StdOut.putText(",");
+                } else if (chr === String.fromCharCode(189)){
+                    _StdOut.putText("-");
+                } else if (chr === String.fromCharCode(190)){
+                    _StdOut.putText(".");
+                } else if (chr === String.fromCharCode(191)){
+                    _StdOut.putText("/");
+                } 
                 else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -118,6 +162,28 @@ module TSOS {
             this.buffer = this.buffer.substring(0, this.buffer.length - 1);
             this.clearLine();
             _StdOut.putText( _OsShell.promptStr + this.buffer);
+            this.arrowValue = -1;
+        }
+
+        public complete(input): void {
+
+            //loop through all commands
+            for(var i = 0; i < _OsShell.commandList.length; i++ ){
+                //compare input to commandlist
+                if(_OsShell.commandList[i].command.includes(input)){
+                    //if input matches, push to array
+                    this.storeCmd.push(_OsShell.commandList[i].command);
+                }
+            }
+            //clear line and print text
+            this.clearLine();
+            _StdOut.putText(_OsShell.promptStr + this.storeCmd[this.tabs]);
+            //add it to buffer
+            this.buffer = this.storeCmd[this.tabs];
+            //loop back if reached end
+            if(this.tabs >= this.storeCmd.length){
+                this.tabs = 0;
+            }
         }
     }
  }

@@ -235,6 +235,9 @@ var TSOS;
                     case "status":
                         _StdOut.putText("Status <string> sets the status message on the task bar.");
                         break;
+                    case "cls":
+                        _StdOut.putText("Clears the screen and resets cursor position");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -329,11 +332,11 @@ var TSOS;
                 _StdOut.putText("Valid hex input.");
         }
         shellStatus(args) {
-            //set status equal to input
+            //set status equal to input on shell
             this.status = args;
             //print update that status has been changed
             _StdOut.putText("Status set to " + args);
-            //update status on host
+            //update status
             document.getElementById("status").innerHTML = "Status: " + this.status + " | ";
         }
     }
