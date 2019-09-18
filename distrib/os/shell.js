@@ -333,11 +333,9 @@ var TSOS;
         }
         shellStatus(args) {
             //set status equal to input on shell
-            this.status = args;
-            //print update that status has been changed
-            _StdOut.putText("Status set to " + args);
-            //update status
-            document.getElementById("status").innerHTML = "Status: " + this.status + " | ";
+            status = args;
+            _StdOut.putText("Setting status equal to " + status);
+            document.getElementById("status").innerHTML = "Status: " + status + " |";
         }
     }
     TSOS.Shell = Shell;
