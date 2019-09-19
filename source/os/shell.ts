@@ -116,6 +116,12 @@ module TSOS {
                 "<string> - Set status message.");
             this.commandList[this.commandList.length] = sc;
 
+            //run
+            sc = new ShellCommand(this.shellRun,
+                "run",
+                "<pid> - runs program with process id <pid>");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -307,6 +313,10 @@ module TSOS {
                         _StdOut.putText("Clears the screen and resets cursor position");
                         break;
 
+                    case "run":
+                        _StdOut.putText("runs/executes program with the entered pid")
+                        break;
+
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -410,6 +420,10 @@ module TSOS {
             status = args;
             _StdOut.putText("Setting status equal to " + status);
             document.getElementById("status").innerHTML = "Status: " + status + " |";
+        }
+
+        public shellRun(){
+            _StdOut.putText("Run command ready");
         }
     }
 }
