@@ -21,6 +21,7 @@ var TSOS;
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
             this.status = "Running";
+            this.pids = 0;
         }
         init() {
             var sc;
@@ -334,8 +335,10 @@ var TSOS;
                 _StdOut.putText("No text entered, not valid hex input.");
             }
             // user actually put in valid hex
-            if (valid)
-                _StdOut.putText("Valid hex input.");
+            if (valid) {
+                _StdOut.putText("Loaded process with PID" + this.pids);
+                this.pids++;
+            }
         }
         shellStatus(args) {
             //set status equal to input on shell

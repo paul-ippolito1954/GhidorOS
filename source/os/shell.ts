@@ -23,6 +23,7 @@ module TSOS {
         public curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
         public apologies = "[sorry]";
         public status = "Running";
+        public pids = 0;
 
         constructor() {
         }
@@ -411,8 +412,11 @@ module TSOS {
                 _StdOut.putText("No text entered, not valid hex input.");
             }
             // user actually put in valid hex
-            if(valid)
-                _StdOut.putText("Valid hex input.");
+            if(valid){
+                _StdOut.putText("Loaded process with PID" + this.pids); 
+                this.pids++;
+            }
+               
         }
 
         public shellStatus(args){

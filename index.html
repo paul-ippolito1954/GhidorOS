@@ -33,7 +33,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <!--<script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip1.js"></script>-->
+   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
    
 </head>
 
@@ -105,6 +105,34 @@
          ></textarea>
       </label>
    </div>
+</div>
+
+<div id="divMemory" style="margin-left:520px;">
+   <label>Memory</label>
+</div>
+<div id="divCpu" style="margin-left:520px;">
+    <label>
+        CPU
+        <br>
+        <table id = "tableCpu">
+        <tr style = "font-weight:bold">
+            <td>PC</td>
+            <td>IR</td>
+            <td>Acc</td>
+            <td>X</td>
+            <td>Y</td>
+            <td>ZF</td>
+        </tr>
+        <tr>
+            <td id = "PC"></td>
+            <td id = "IR"></td>
+            <td id = "Acc"></td>
+            <td id = "Xreg"></td>
+            <td id = "Yreg"></td>
+            <td id = "Zflag"></td>
+        </tr>
+        </table>
+    </label>
 </div>
 
 <p class="footerText" style="clear:both;">
