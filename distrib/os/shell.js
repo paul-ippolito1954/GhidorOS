@@ -336,7 +336,9 @@ var TSOS;
             }
             // user actually put in valid hex
             if (valid) {
-                _StdOut.putText("Loaded process with PID" + this.pids);
+                _StdOut.putText("Loaded process with PID ");
+                _StdOut.advanceLine();
+                _StdOut.putText(this.pids);
                 this.pids++;
             }
         }

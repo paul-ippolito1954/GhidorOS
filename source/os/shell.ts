@@ -395,9 +395,18 @@ module TSOS {
             _StdOut.putText("Loading...");
             _StdOut.advanceLine();
 
+            
+
             // tests input against regex for hex, displays error for specific characters
             // or if no text/valid hex is entered
             for(var i = 0; i < input.length; i++) {
+
+                if(((i + 1) % 3 == 0) && input.charAt(i) != " "){
+                    _StdOut.putText("Must add a space at position " + i);
+                    valid = false;
+                    break;
+                }
+
                 if (input.charAt(i).match("-?[0-9a-fA-F\\s]+")) {
                     valid = true;
                 } else {
@@ -413,7 +422,7 @@ module TSOS {
             }
             // user actually put in valid hex
             if(valid){
-                _StdOut.putText("Loaded process with PID" + this.pids); 
+                _StdOut.putText("Loaded process with PID " + this.pids);
                 this.pids++;
             }
                

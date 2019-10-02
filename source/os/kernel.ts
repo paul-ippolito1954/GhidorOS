@@ -16,6 +16,11 @@
 module TSOS {
 
     export class Kernel {
+
+        // list for readyQueue
+        public readyQueue = [];
+
+
         //
         // OS Startup and Shutdown Routines
         //

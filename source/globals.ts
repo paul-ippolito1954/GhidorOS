@@ -50,7 +50,7 @@ var _StdIn;    // Same "to null or not to null" issue as above.
 var _StdOut;
 
 // create Memory var
-//var _Memory = TSOS.Memory;
+var _Memory = TSOS.Memory;
 
 // UI
 var _Console: TSOS.Console;
