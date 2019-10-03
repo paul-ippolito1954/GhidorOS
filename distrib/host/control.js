@@ -1,5 +1,5 @@
 ///<reference path="../globals.ts" />
-///<reference path="../os/canvastext.ts" />
+///<reference path="../../source/os/canvastext.ts" />
 /* ------------
      Control.ts
 
@@ -78,9 +78,7 @@ var TSOS;
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
-            // new instance of Memory created
-            //_Memory = new Memory();
-            //_Memory.init();
+            this.loadTable();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");
@@ -98,7 +96,71 @@ var TSOS;
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
+        //function to update the memory table
+        static loadTable() {
+            //find table div and set id
+            var tableDiv = document.getElementById("divMemory");
+            this.tbl.setAttribute("id", "tableMemory");
+            //set equal to number that memory column header should be equal to
+            var memNum = 0;
+            //loop through 32 times to create 32 rows
+            for (var i = 0; i < 32; i++) {
+                var tr = this.tbl.insertRow();
+                //create 9 columns in those rows
+                for (var j = 0; j < 9; j++) {
+                    var td = tr.insertCell();
+                    //if first in column
+                    if (j == 0) {
+                        var hexNum = memNum.toString(16).toUpperCase();
+                        //if single digit, add 0x00 in front
+                        if (hexNum.length == 1)
+                            td.appendChild(document.createTextNode("0x00" + hexNum));
+                        //if two digits, add 0x0 in front
+                        else if (hexNum.length == 2)
+                            td.appendChild(document.createTextNode("0x0" + hexNum));
+                        //if three digits, add 0x in front
+                        else
+                            td.appendChild(document.createTextNode("0x" + hexNum));
+                    }
+                    //if not first in column
+                    else {
+                        //add memory value to cell
+                        td.appendChild(document.createTextNode(_Memory.memArray[_Memory.memArrayPosition]));
+                        //if not at the end of the row, increment row count
+                        _Memory.memArrayPosition++;
+                    }
+                }
+                //increment column header by 8
+                memNum += 8;
+            }
+            //add to page
+            tableDiv.appendChild(this.tbl);
+            //set height and overflow of memory table
+            document.getElementById("tableMemory").style.height = '100px';
+            document.getElementById("tableMemory").style.overflow = 'auto';
+            //reset counters to 0
+            _Memory.memArrayPosition = 0;
+        }
+        static updatePCB(pid, status, pc, acc, ir, xreg, yreg, zflag) {
+            document.getElementById("pcbPID").innerHTML = pid;
+            document.getElementById("pcbStatus").innerHTML = status;
+            document.getElementById("pcbPC").innerHTML = pc;
+            document.getElementById("pcbAcc").innerHTML = acc;
+            document.getElementById("pcbIR").innerHTML = ir;
+            document.getElementById("pcbXreg").innerHTML = xreg;
+            document.getElementById("pcbYreg").innerHTML = yreg;
+            document.getElementById("pcbZflag").innerHTML = zflag;
+        }
+        static updateCPU(PC, Acc, IR, Xreg, Yreg, Zflag) {
+            document.getElementById("PC").innerHTML = PC;
+            document.getElementById("Acc").innerHTML = Acc;
+            document.getElementById("IR").innerHTML = IR;
+            document.getElementById("Xreg").innerHTML = Xreg;
+            document.getElementById("Yreg").innerHTML = Yreg;
+            document.getElementById("Zflag").innerHTML = Zflag;
+        }
     }
+    Control.tbl = document.createElement('table');
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));
 //# sourceMappingURL=control.js.map

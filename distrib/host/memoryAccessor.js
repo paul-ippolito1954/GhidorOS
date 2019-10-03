@@ -1,36 +1,29 @@
 ///<reference path="../globals.ts" />
-
 /* ------------
      MemoryAccessor.ts
      Requires global.ts.
      ------------ */
-
-module TSOS {
-
-    export class MemoryAccessor {
-
-        public static readMemory(position: number): string {
+var TSOS;
+(function (TSOS) {
+    class MemoryAccessor {
+        static readMemory(position) {
             return _Memory.memArray[position];
         }
-
-        public static writeMemory(position: number,  val: string): void {
+        static writeMemory(position, val) {
             console.log("Current val: " + _Memory.memArray[position] + ", pos: " + position + ", updated val: " + val);
             _Memory.memArray[position] = val;
             console.log("Update mem: " + _Memory.memArray.toString());
-            
             TSOS.Control.loadTable();
         }
-
-        public static clearMem(): void {
-            for(var i = 0; i < 256; i++){
-                    _Memory.memArray[i] = "00";
+        static clearMem() {
+            for (var i = 0; i < 256; i++) {
+                _Memory.memArray[i] = "00";
             }
         }
-
-        public static memoryLength(): number{
+        static memoryLength() {
             return _Memory.memArray.length;
         }
     }
-
-}
-
+    TSOS.MemoryAccessor = MemoryAccessor;
+})(TSOS || (TSOS = {}));
+//# sourceMappingURL=memoryAccessor.js.map

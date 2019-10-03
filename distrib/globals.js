@@ -38,7 +38,7 @@ var _KernelBuffers = null; // when clearly 'any' is not what we want. There is l
 var _StdIn; // Same "to null or not to null" issue as above.
 var _StdOut;
 // create Memory var
-//var _Memory = TSOS.Memory;
+var _Memory;
 // UI
 var _Console;
 var _OsShell;
