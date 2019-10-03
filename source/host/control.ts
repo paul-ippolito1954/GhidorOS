@@ -103,6 +103,8 @@ module TSOS {
 
 
             this.loadTable();
+            
+            
         }
 
         public static hostBtnHaltOS_click(btn): void {
@@ -123,7 +125,17 @@ module TSOS {
             // page from its cache, which is not what we want.
         }
 
-        //function to update the memory table
+         //method to clear the memory table
+         public static clearTable():void {
+            var tableDiv = document.getElementById("divMemory");
+            //loop down to delete every row
+            for(var i = this.tbl.rows.length - 1; i >= 0; i--)
+                this.tbl.deleteRow(i);
+            //make the table disappear
+            tableDiv.removeChild(this.tbl);
+        }
+
+        //method to update the memory table
         public static loadTable():void {
             //find table div and set id
             var tableDiv = document.getElementById("divMemory");
@@ -193,4 +205,3 @@ module TSOS {
 
     }
 }  
-

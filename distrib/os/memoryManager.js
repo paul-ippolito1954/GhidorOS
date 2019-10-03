@@ -18,7 +18,7 @@ var TSOS;
             }
             this.endProgram = position;
             console.log("After: " + _Memory.memArray.toString() + " length: " + this.endProgram);
-            //TSOS.Control.clearTable();
+            TSOS.Control.clearTable();
             TSOS.Control.loadTable();
         }
     }

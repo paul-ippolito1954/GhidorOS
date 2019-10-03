@@ -96,7 +96,16 @@ var TSOS;
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
-        //function to update the memory table
+        //method to clear the memory table
+        static clearTable() {
+            var tableDiv = document.getElementById("divMemory");
+            //loop down to delete every row
+            for (var i = this.tbl.rows.length - 1; i >= 0; i--)
+                this.tbl.deleteRow(i);
+            //make the table disappear
+            tableDiv.removeChild(this.tbl);
+        }
+        //method to update the memory table
         static loadTable() {
             //find table div and set id
             var tableDiv = document.getElementById("divMemory");
