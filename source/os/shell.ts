@@ -291,7 +291,7 @@ module TSOS {
 						 break;
 
 					case "combust":
-					     _StdOut.putText("Combust engages combustible lemons. I wouldn't if I were you...");
+					     _StdOut.putText("Engages combustible lemons. I wouldn't if I were you...");
 						 break;
 
 					case "date":
@@ -303,7 +303,7 @@ module TSOS {
                         break;
                     
                     case "load":
-                        _StdOut.putText("Loads and validates hex input from User Program Input");
+                        _StdOut.putText("Loads and validates hex input from User Program Input, loads valid hex as program to memory");
                         break;
                     
                     case "status":
@@ -422,8 +422,8 @@ module TSOS {
             }
             // user actually put in valid hex
             if(valid){
-                _StdOut.putText("Loaded process with PID " + this.pids);
-                this.pids++;
+                _StdOut.putText("Loaded with pid "+ String(_OsShell.pids));
+                _OsShell.pids++;
             }
                
         }
