@@ -39,6 +39,7 @@ var _StdIn; // Same "to null or not to null" issue as above.
 var _StdOut;
 // create Memory var
 var _Memory;
+var _Pcb;
 // UI
 var _Console;
 var _OsShell;

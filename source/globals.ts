@@ -52,6 +52,7 @@ var _StdOut;
 // create Memory var
 var _Memory: TSOS.Memory;
 
+var _Pcb: TSOS.ProcessControlBlock;
 // UI
 var _Console: TSOS.Console;
 var _OsShell: TSOS.Shell;
