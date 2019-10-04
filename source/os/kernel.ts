@@ -167,6 +167,14 @@ module TSOS {
         //
         // OS Utility Routines
         //
+
+        public createProcess(pid: number){
+            var newProc = new ProcessControlBlock(pid);
+            this.readyQueue.push(newProc);
+            newProc.init();
+        }
+
+
         public krnTrace(msg: string) {
              // Check globals to see if trace is set ON.  If so, then (maybe) log the message.
              if (_Trace) {

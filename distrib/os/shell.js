@@ -21,7 +21,9 @@ var TSOS;
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
             this.status = "Running";
-            this.pids = 0;
+            // for some odd reason, will skip 1 and go to 2 if loaded twice
+            // initalizing to -1 and increasing pids first remedies this
+            this.pids = -1;
         }
         init() {
             var sc;
@@ -341,9 +343,10 @@ var TSOS;
             }
             // user actually put in valid hex, assign process Id, make process, load to memory
             if (valid) {
-                _StdOut.putText("Loaded with pid " + String(_OsShell.pids));
                 _OsShell.pids++;
+                _StdOut.putText("Loaded with pid " + String(_OsShell.pids));
                 TSOS.MemoryManager.updateMemory(input.toString());
+                _Kernel.createProcess(_OsShell.pids);
             }
         }
         shellStatus(args) {
