@@ -40,6 +40,8 @@ var _StdOut;
 // create Memory var
 var _Memory;
 var _Pcb;
+var _MemoryAccessor;
+var _MemoryManager;
 // UI
 var _Console;
 var _OsShell;

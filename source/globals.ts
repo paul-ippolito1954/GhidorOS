@@ -53,6 +53,12 @@ var _StdOut;
 var _Memory: TSOS.Memory;
 
 var _Pcb: TSOS.ProcessControlBlock;
+
+var _MemoryAccessor: TSOS.MemoryAccessor;
+
+var _MemoryManager: TSOS.MemoryManager;
+
+
 // UI
 var _Console: TSOS.Console;
 var _OsShell: TSOS.Shell;

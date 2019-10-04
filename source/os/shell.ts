@@ -425,10 +425,12 @@ module TSOS {
             }
             // user actually put in valid hex, assign process Id, make process, load to memory
             if(valid){
-                
+
                 _OsShell.pids++;
                 _StdOut.putText("Loaded with pid "+ String(_OsShell.pids));
                 TSOS.MemoryManager.updateMemory(input.toString());
+
+                // create process and update the PCB on browser
                 _Kernel.createProcess(_OsShell.pids);
             }
                
@@ -441,8 +443,18 @@ module TSOS {
             document.getElementById("status").innerHTML = "Status: " + status + " |";
         }
 
-        public shellRun(){
-            _StdOut.putText("Run command ready");
+        public shellRun(args){
+            console.log("PID: " + _OsShell.pids);
+
+            if(_OsShell.pids == args){
+                _CPU.runningPID = args;
+                _CPU.isExecuting = true;
+            }
+            else{
+                _StdOut.putText("Invalid Process ID");
+            }
+
+            
         }
     }
 }

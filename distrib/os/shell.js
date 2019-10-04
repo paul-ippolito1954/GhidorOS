@@ -346,6 +346,7 @@ var TSOS;
                 _OsShell.pids++;
                 _StdOut.putText("Loaded with pid " + String(_OsShell.pids));
                 TSOS.MemoryManager.updateMemory(input.toString());
+                // create process and update the PCB on browser
                 _Kernel.createProcess(_OsShell.pids);
             }
         }
@@ -355,8 +356,15 @@ var TSOS;
             _StdOut.putText("Setting status equal to " + status);
             document.getElementById("status").innerHTML = "Status: " + status + " |";
         }
-        shellRun() {
-            _StdOut.putText("Run command ready");
+        shellRun(args) {
+            console.log("PID: " + _OsShell.pids);
+            if (_OsShell.pids == args) {
+                _CPU.runningPID = args;
+                _CPU.isExecuting = true;
+            }
+            else {
+                _StdOut.putText("Invalid Process ID");
+            }
         }
     }
     TSOS.Shell = Shell;
