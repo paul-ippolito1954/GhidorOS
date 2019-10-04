@@ -339,10 +339,11 @@ var TSOS;
                 valid = false;
                 _StdOut.putText("No text entered, not valid hex input.");
             }
-            // user actually put in valid hex
+            // user actually put in valid hex, assign process Id, make process, load to memory
             if (valid) {
                 _StdOut.putText("Loaded with pid " + String(_OsShell.pids));
                 _OsShell.pids++;
+                TSOS.MemoryManager.updateMemory(input.toString());
             }
         }
         shellStatus(args) {
