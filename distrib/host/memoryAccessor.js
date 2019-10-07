@@ -13,6 +13,7 @@ var TSOS;
             console.log("Current val: " + _Memory.memArray[position] + ", pos: " + position + ", updated val: " + val);
             _Memory.memArray[position] = val;
             console.log("Update mem: " + _Memory.memArray.toString());
+            TSOS.Control.clearTable();
             TSOS.Control.loadTable();
         }
         static clearMem() {
