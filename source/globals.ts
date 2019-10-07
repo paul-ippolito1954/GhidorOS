@@ -49,14 +49,15 @@ var _KernelBuffers: any[] = null;   // when clearly 'any' is not what we want. T
 var _StdIn;    // Same "to null or not to null" issue as above.
 var _StdOut;
 
-// create Memory var
+// create Memory var and other hardware
 var _Memory: TSOS.Memory;
 
 var _Pcb: TSOS.ProcessControlBlock;
 
 var _MemoryAccessor: TSOS.MemoryAccessor;
 
-var _MemoryManager: TSOS.MemoryManager;
+// Software OS
+var _MemoryManager: any = null;
 
 
 // UI

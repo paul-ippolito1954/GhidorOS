@@ -37,11 +37,12 @@ var _KernelBuffers = null; // when clearly 'any' is not what we want. There is l
 // Standard input and output
 var _StdIn; // Same "to null or not to null" issue as above.
 var _StdOut;
-// create Memory var
+// create Memory var and other hardware
 var _Memory;
 var _Pcb;
 var _MemoryAccessor;
-var _MemoryManager;
+// Software OS
+var _MemoryManager = null;
 // UI
 var _Console;
 var _OsShell;
