@@ -81,6 +81,8 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "runs all processes loaded");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "displays all IDs and states of all processes");
+            this.commandList[this.commandList.length] = sc;
             // kill <id> - kills the specified process id.
             //
             // Display the initial prompt.
@@ -259,6 +261,9 @@ var TSOS;
                     case "runall":
                         _StdOut.putText("Will run all programs in resident queue");
                         break;
+                    case "ps":
+                        _StdOut.putText("Displays all process IDs and states of the processes");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -383,6 +388,9 @@ var TSOS;
         }
         shellRunAll() {
             _StdOut.putText("I'm gonna run EVERYTHING");
+        }
+        shellPs() {
+            _StdOut.putText("Wanna see some processes????");
         }
     }
     TSOS.Shell = Shell;
