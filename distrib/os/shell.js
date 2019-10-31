@@ -77,6 +77,9 @@ var TSOS;
             //clearmem
             sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "kills all resident or waiting processes, clears memory");
             this.commandList[this.commandList.length] = sc;
+            //runall
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "runs all processes loaded");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -253,6 +256,9 @@ var TSOS;
                     case "clearmem":
                         _StdOut.putText("Clears memory if no processes running");
                         break;
+                    case "runall":
+                        _StdOut.putText("Will run all programs in resident queue");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -374,6 +380,9 @@ var TSOS;
         }
         shellClearMem() {
             _StdOut.putText("Will clear memory eventually");
+        }
+        shellRunAll() {
+            _StdOut.putText("I'm gonna run EVERYTHING");
         }
     }
     TSOS.Shell = Shell;
