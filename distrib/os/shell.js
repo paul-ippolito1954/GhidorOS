@@ -74,6 +74,9 @@ var TSOS;
             //run
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - runs program with process id <pid>");
             this.commandList[this.commandList.length] = sc;
+            //clearmem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "kills all resident or waiting processes, clears memory");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -247,6 +250,9 @@ var TSOS;
                     case "run":
                         _StdOut.putText("runs/executes program with the entered pid");
                         break;
+                    case "clearmem":
+                        _StdOut.putText("Clears memory if no processes running");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -365,6 +371,9 @@ var TSOS;
             else {
                 _StdOut.putText("Invalid Process ID");
             }
+        }
+        shellClearMem() {
+            _StdOut.putText("Will clear memory eventually");
         }
     }
     TSOS.Shell = Shell;
