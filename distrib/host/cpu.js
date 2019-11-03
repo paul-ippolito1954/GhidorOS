@@ -1,15 +1,12 @@
 ///<reference path="../globals.ts" />
 /* ------------
-     CPU.ts
-
+     CPU.tss
      Requires global.ts.
-
      Routines for the host CPU simulation, NOT for the OS itself.
      In this manner, it's A LITTLE BIT like a hypervisor,
      in that the Document environment inside a browser is the "bare metal" (so to speak) for which we write code
      that hosts our client OS. But that analogy only goes so far, and the lines are blurred, because we are using
      TypeScript/JavaScript in both the host and client environments.
-
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
@@ -34,7 +31,7 @@ var TSOS;
             this.Yreg = "0";
             this.Zflag = "0";
             this.isExecuting = false;
-            TSOS.Control.updateCPU(this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            TSOS.Control.updateCPU(String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
@@ -44,12 +41,12 @@ var TSOS;
             this.program = _Kernel.readyQueue[this.runningPID];
             //update status to running
             this.program.status = "Running";
-            TSOS.Control.updatePCB(this.program.processId, this.program.status, this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
-            //send input to opCodes to check what actions need to be performed
+            TSOS.Control.updatePCB(this.program.processId, this.program.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            // send input to opCodes to check what actions need to be performed
             _CPU.opCodes(TSOS.MemoryAccessor.readMemory(this.position));
             this.position++;
-            //update PCB
-            TSOS.Control.updatePCB(this.program.processId, this.program.status, this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            // update PCB
+            TSOS.Control.updatePCB(this.program.processId, this.program.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
             if (this.position >= TSOS.MemoryAccessor.memoryLength()) {
                 this.terminateOS();
             }
@@ -57,7 +54,7 @@ var TSOS;
         terminateOS() {
             //set status to terminated and update block
             this.program.status = "Terminated";
-            TSOS.Control.updatePCB(this.program.processId, this.program.status, this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            TSOS.Control.updatePCB(this.program.processId, this.program.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
             //mark isExecuting as false
             this.isExecuting = false;
             //set memory back to 0
@@ -74,7 +71,7 @@ var TSOS;
                 case "A9":
                     this.IR = "A9";
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //find next code to get values for op code
                     this.Acc = arg;
                     this.position++;
@@ -84,7 +81,7 @@ var TSOS;
                     this.IR = "AD";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set the acc value to this position in memory
                     this.Acc = TSOS.MemoryAccessor.readMemory(+arg);
                     this.position += 2;
@@ -94,7 +91,7 @@ var TSOS;
                     this.IR = "8D";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set this position in memory equal to the acc value
                     TSOS.MemoryAccessor.writeMemory((+arg), this.Acc);
                     this.position += 2;
@@ -104,8 +101,7 @@ var TSOS;
                     this.IR = "6D";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
-                    //get acc value
+                    arg = this.convertHex(addr); //get acc value
                     var accValue = (+this.Acc);
                     console.log("Acc Val: " + accValue + ", add: " + arg);
                     //find address corresponding to user input and add it to acc value
@@ -120,7 +116,7 @@ var TSOS;
                 case "A2":
                     this.IR = "A2";
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set xreg to user input
                     this.Xreg = arg;
                     this.position += 1;
@@ -130,7 +126,7 @@ var TSOS;
                     this.IR = "AE";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set the xreg value to this position in memory
                     this.Xreg = TSOS.MemoryAccessor.readMemory(+arg);
                     this.position += 2;
@@ -139,7 +135,7 @@ var TSOS;
                 case "A0":
                     this.IR = "A0";
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set yreg to user input
                     this.Yreg = arg;
                     this.position += 1;
@@ -149,7 +145,7 @@ var TSOS;
                     this.IR = "AC";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //set the yreg value to this position in memory
                     this.Yreg = TSOS.MemoryAccessor.readMemory(+arg);
                     this.position += 2;
@@ -169,7 +165,7 @@ var TSOS;
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
                     console.log("Mem add: " + addr);
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     console.log("Conv: " + arg);
                     //get xreg value
                     var xValue = (+this.Xreg);
@@ -201,9 +197,9 @@ var TSOS;
                     this.IR = "EE";
                     //find next 2 codes and swap them to get values for op code
                     addr = (TSOS.MemoryAccessor.readMemory(this.position + 2) + TSOS.MemoryAccessor.readMemory(this.position + 1));
-                    arg = addr;
+                    arg = this.convertHex(addr);
                     //add 1 to position in mem
-                    var memVal = (+TSOS.MemoryAccessor.readMemory(+arg)) + 1;
+                    memVal = (+TSOS.MemoryAccessor.readMemory(+arg)) + 1;
                     TSOS.MemoryAccessor.writeMemory((+arg), memVal.toString());
                     //make sure valid number
                     if (!isNaN(accValue))
@@ -230,7 +226,7 @@ var TSOS;
                             //Go to this spot in the memory
                             var byte = TSOS.MemoryAccessor.readMemory(yRegVal);
                             //Get the char code from this spot's value
-                            var char = String.fromCharCode(byte);
+                            var char = String.fromCharCode(Number(byte));
                             yRegVal++;
                             //add char to string
                             stringBuilder += char;
@@ -241,8 +237,128 @@ var TSOS;
                     break;
             }
             this.PC = this.position;
-            TSOS.Control.updateCPU(this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
-            TSOS.Control.updatePCB(this.program.processId, this.program.status, this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            TSOS.Control.updateCPU(String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            TSOS.Control.updatePCB(this.program.processId, this.program.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+        }
+        /**
+         * This method converts Strings to hex and returns the hex number.
+         * Without this, outputs are incorrect. Namely the "12DONE" program
+         * would output "012,".
+         * @param hex
+         */
+        convertHex(hex) {
+            var add = 0;
+            console.log("Var: " + hex + ", 2: " + hex[2] + " 3: " + hex[3]);
+            if (hex.length == 4) {
+                /*
+                   Get first number, if needed to be translated, multiply by 16.
+                */
+                switch (hex[2]) {
+                    case "A":
+                        add = 10 * 16;
+                        break;
+                    case "B":
+                        add = 11 * 16;
+                        break;
+                    case "C":
+                        add = 12 * 16;
+                        break;
+                    case "D":
+                        add = 13 * 16;
+                        break;
+                    case "E":
+                        add = 14 * 16;
+                        break;
+                    case "F":
+                        add = 15 * 16;
+                        break;
+                    default:
+                        add = (+hex[2]) * 16;
+                        break;
+                }
+                /* Get second number. If translation needed, multiply 16
+                 and add first, otherwise just add to first
+                * */
+                switch (hex[3]) {
+                    case "A":
+                        add += 10;
+                        break;
+                    case "B":
+                        add += 11;
+                        break;
+                    case "C":
+                        add += 12;
+                        break;
+                    case "D":
+                        add += 13;
+                        break;
+                    case "E":
+                        add += 14;
+                        break;
+                    case "F":
+                        add += 15;
+                        break;
+                    default:
+                        add += (+hex[3]);
+                        break;
+                }
+            }
+            else if (hex.length == 2) {
+                /*
+                   Get first number, if needed to be translated, multiply by 16.
+                   Either way, it's getting multiplied by 16
+                */
+                switch (hex[0]) {
+                    case "A":
+                        add = 10 * 16;
+                        break;
+                    case "B":
+                        add = 11 * 16;
+                        break;
+                    case "C":
+                        add = 12 * 16;
+                        break;
+                    case "D":
+                        add = 13 * 16;
+                        break;
+                    case "E":
+                        add = 14 * 16;
+                        break;
+                    case "F":
+                        add = 15 * 16;
+                        break;
+                    default:
+                        add = (+hex[0]) * 16;
+                        break;
+                }
+                // get second number, add to first if translation needed
+                switch (hex[1]) {
+                    case "A":
+                        add += 10;
+                        break;
+                    case "B":
+                        add += 11;
+                        break;
+                    case "C":
+                        add += 12;
+                        break;
+                    case "D":
+                        add += 13;
+                        break;
+                    case "E":
+                        add += 14;
+                        break;
+                    case "F":
+                        add += 15;
+                        break;
+                    default:
+                        add += (+hex[1]);
+                        break;
+                }
+            }
+            console.log("Hex: " + add);
+            //return hex number
+            return add;
         }
     }
     TSOS.Cpu = Cpu;
