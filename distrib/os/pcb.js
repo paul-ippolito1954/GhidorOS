@@ -31,7 +31,7 @@ var TSOS;
             this.Xreg = "0";
             this.Yreg = "0";
             this.Zflag = "0";
-            TSOS.Control.updatePCB(this.processId, this.status, this.PC, this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            TSOS.Control.updatePCB(this.processId, this.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
         }
     }
     TSOS.ProcessControlBlock = ProcessControlBlock;
