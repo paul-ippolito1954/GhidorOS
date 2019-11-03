@@ -86,6 +86,12 @@ var TSOS;
             // kill <id> - kills the specified process id.
             sc = new TSOS.ShellCommand(this.shellKill, "kill", "<pid> - kills specified process with speciifed pid");
             this.commandList[this.commandList.length] = sc;
+            // killall - becasue killing one wasn't enough
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "kills all processes");
+            this.commandList[this.commandList.length] = sc;
+            //quantum - set new Round Robin Quantum
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "<int> - sets Round Robin Quantum to new int");
+            this.commandList[this.commandList.length] = sc;
             //
             // Display the initial prompt.
             this.putPrompt();
@@ -269,6 +275,12 @@ var TSOS;
                     case "kill":
                         _StdOut.putText("Will kill speciifed process with speciifed pid");
                         break;
+                    case "killall":
+                        _StdOut.putText("Will kill ALL processes. Releases King Ghidorah");
+                        break;
+                    case "quantum":
+                        _StdOut.putText("Sets Round Robin processing quantum to your integer");
+                        break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -401,6 +413,14 @@ var TSOS;
             _StdOut.putText("I know not why I'm here, all I know;");
             _StdOut.advanceLine();
             _StdOut.putText("I MUST KILL");
+        }
+        shellKillAll() {
+            _StdOut.putText("CHITTY CHITTY BANG");
+            _StdOut.advanceLine();
+            _StdOut.putText("MURDER EVERYTHING");
+        }
+        shellQuantum(args) {
+            _StdOut.putText("Setting quantum to " + args);
         }
     }
     TSOS.Shell = Shell;
