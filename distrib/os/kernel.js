@@ -144,7 +144,7 @@ var TSOS;
         // OS Utility Routines
         //
         createProcess(pid) {
-            var newProc = new TSOS.ProcessControlBlock(pid);
+            var newProc = new TSOS.ProcessControlBlock(String(pid));
             this.readyQueue.push(newProc);
             newProc.init();
         }

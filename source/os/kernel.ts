@@ -169,7 +169,7 @@ module TSOS {
         //
 
         public createProcess(pid: number){
-            var newProc = new ProcessControlBlock(pid);
+            var newProc = new ProcessControlBlock(String(pid));
             this.readyQueue.push(newProc);
             newProc.init();
         }
