@@ -23,7 +23,9 @@
                         public IR: string = "0",
                         public Xreg: string = "0",
                         public Yreg: string = "0",
-                        public Zflag: string = "0") {
+                        public Zflag: string = "0",
+                        public waitTime: number = 0,
+                        public turnAround: number = 0) {
             }
     
             public init(): void {
@@ -34,6 +36,8 @@
                 this.Xreg = "0";
                 this.Yreg = "0";
                 this.Zflag = "0";
+                this.waitTime = 0;
+                this.turnAround = 0;
     
                 TSOS.Control.updatePCB(this.processId, this.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
             }

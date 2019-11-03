@@ -20,6 +20,9 @@ module TSOS {
         // list for readyQueue
         public readyQueue = [];
 
+        // running queue list
+        public runningQueue = [];
+
 
         //
         // OS Startup and Shutdown Routines
