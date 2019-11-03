@@ -143,7 +143,13 @@ module TSOS {
                 "ps",
                 "displays all IDs and states of all processes");
             this.commandList[this.commandList.length] = sc;
+
             // kill <id> - kills the specified process id.
+            sc = new ShellCommand(this.shellKill,
+                "kill",
+                "<pid> - kills specified process with speciifed pid");
+            this.commandList[this.commandList.length] = sc;
+
 
             //
             // Display the initial prompt.
@@ -349,6 +355,10 @@ module TSOS {
                         _StdOut.putText("Displays all process IDs and states of the processes");
                         break;
 
+                    case "kill":
+                        _StdOut.putText("Will kill speciifed process with speciifed pid");
+                        break;
+
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -495,6 +505,12 @@ module TSOS {
 
         public shellPs(){
             _StdOut.putText("Wanna see some processes????");
+        }
+
+        public shellKill(args){
+            _StdOut.putText("I know not why I'm here, all I know;");
+            _StdOut.advanceLine();
+            _StdOut.putText("I MUST KILL");
         }
     }
 }
