@@ -22,13 +22,15 @@ module TSOS {
         }
 
         public static clearMem(): void {
-            for(var i = 0; i < 256; i++){
-                    _Memory.memArray[i] = "00";
+            for(var j = 0; j < 3; j++) {
+                for (var i = 0; i < 256; i++) {
+                    _Memory.memArray[j][i] = "00";
+                }
             }
         }
 
         public static memoryLength(): number{
-            return _Memory.memArray.length;
+            return _Memory.memArray[0].length;
         }
     }
 
