@@ -10,13 +10,17 @@ module TSOS {
     export class MemoryAccessor {
 
         public static readMemory(position: number): string {
-            return _Memory.memArray[position];
+            return _Memory.memArray[_CPU.program.segment][position];
         }
 
         public static writeMemory(position: number,  val: string): void {
-            console.log("Current val: " + _Memory.memArray[position] + ", pos: " + position + ", updated val: " + val);
-            _Memory.memArray[position] = val;
-            console.log("Update mem: " + _Memory.memArray.toString());
+
+            val = (+val).toString(16).toUpperCase();
+            if(val.length == 1)
+                _Memory.memArray[_CPU.program.segment][position] = "0" + val;
+            else
+                _Memory.memArray[_CPU.program.segment][position] = val;
+            //console.log("Update mem: " + _Memory.memArray.toString());
             TSOS.Control.clearTable();
             TSOS.Control.loadTable();
         }
