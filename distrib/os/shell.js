@@ -524,8 +524,20 @@ var TSOS;
             _StdOut.advanceLine();
             _StdOut.putText("MURDER EVERYTHING");
         }
+        /**
+         * Sets roundrobin quantum to user's desired int
+         * as long as it is greater than 0
+         * @param args
+         */
         shellQuantum(args) {
-            _StdOut.putText("Under maintenance");
+            var quantNum = args[0];
+            if (quantNum > 0) {
+                _Scheduler.quantum = quantNum;
+                _StdOut.putText("Setting quantum to " + quantNum);
+            }
+            else {
+                _StdOut.putText("Quantum must be greater than 0.");
+            }
         }
     }
     TSOS.Shell = Shell;
