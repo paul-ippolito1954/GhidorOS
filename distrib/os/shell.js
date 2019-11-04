@@ -347,6 +347,12 @@ var TSOS;
         shellBSOD() {
             _Kernel.krnTrapError("Error caused by YOU");
         }
+        /**
+         * Reads in the code from the UserProgramInput
+         * validates if hex. If valid hex, allocate to a free memory partition
+         * and update memory to reflect that. If not valid hex or memory is full,
+         * inform the user of either respectively.
+         */
         shellLoad() {
             //store the user input in a variable
             var programInput = document.getElementById("taProgramInput").value;
@@ -387,6 +393,12 @@ var TSOS;
                 }
             }
         }
+        /**
+         * Changes the status message in taskBar to whatever the user
+         * inputs. so status cake is a thing. It also clears the inital
+         * status message from startup.
+         * @param args
+         */
         shellStatus(args) {
             // check arguments
             if (args.length > 0) {
@@ -402,6 +414,11 @@ var TSOS;
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
             }
         }
+        /**
+         * This will run the process with the asociated pid if it exists
+         * will accept run 0, check if 0 is a valid pid, and run if it is
+         * @param args
+         */
         shellRun(args) {
             // set pid to first argument
             var pid = args[0];
@@ -423,11 +440,33 @@ var TSOS;
                 _StdOut.putText("Not a valid Pid");
             }
         }
+        /**
+         * ClearMem will only work if CPU is not running ANY programs.
+         * So, we check if CPU isExecuting. If it is not, go ahead
+         * and clear the memory. If it IS, NO! THAT'S BAD! BAD USER!
+         */
         shellClearMem() {
-            _StdOut.putText("Under maintenance");
+            if (_CPU.isExecuting == false) {
+                _Kernel.clearMemory();
+            }
+            else {
+                _StdOut.putText("Cannot clear memory while program is running.");
+            }
         }
+        /**
+         * This will run ALL loaded programs.
+         * Even if one program is already being executed,
+         * this will make the others run as well. This will
+         * only work if there's actually something in the resident
+         * queue to actualy run, however.
+         */
         shellRunAll() {
-            _StdOut.putText("Under maintenance");
+            if (_ResidentQueue.getSize() == 0) {
+                _StdOut.putText("No processes to run");
+            }
+            else {
+                _Kernel.executeAll();
+            }
         }
         shellPs() {
             _StdOut.putText("Under maintenance");

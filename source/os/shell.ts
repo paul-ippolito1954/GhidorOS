@@ -444,10 +444,17 @@ module TSOS {
              _Kernel.krnShutdown();
         }
         
+
         public shellBSOD(){
             _Kernel.krnTrapError("Error caused by YOU");
         }
 
+        /**
+         * Reads in the code from the UserProgramInput
+         * validates if hex. If valid hex, allocate to a free memory partition
+         * and update memory to reflect that. If not valid hex or memory is full,
+         * inform the user of either respectively.
+         */
         public shellLoad(){
 
                //store the user input in a variable
@@ -493,6 +500,12 @@ module TSOS {
 
         }
 
+        /**
+         * Changes the status message in taskBar to whatever the user
+         * inputs. so status cake is a thing. It also clears the inital
+         * status message from startup. 
+         * @param args 
+         */
         public shellStatus(args){
 
             // check arguments
@@ -509,6 +522,11 @@ module TSOS {
             }
         }
 
+        /**
+         * This will run the process with the asociated pid if it exists
+         * will accept run 0, check if 0 is a valid pid, and run if it is
+         * @param args
+         */
         public shellRun(args){
             
             // set pid to first argument
@@ -536,14 +554,36 @@ module TSOS {
                 _StdOut.putText("Not a valid Pid");
             }
         }
-
+        
+        /**
+         * ClearMem will only work if CPU is not running ANY programs.
+         * So, we check if CPU isExecuting. If it is not, go ahead
+         * and clear the memory. If it IS, NO! THAT'S BAD! BAD USER!
+         */
         public shellClearMem(){
-            _StdOut.putText("Under maintenance");
+
+            if (_CPU.isExecuting == false){
+                _Kernel.clearMemory();
+            }else{
+                _StdOut.putText("Cannot clear memory while program is running.");
+            }
         }
 
+        /**
+         * This will run ALL loaded programs.
+         * Even if one program is already being executed,
+         * this will make the others run as well. This will
+         * only work if there's actually something in the resident
+         * queue to actualy run, however.
+         */
         public shellRunAll(){
             
-            _StdOut.putText("Under maintenance");
+            if (_ResidentQueue.getSize() == 0){
+                _StdOut.putText("No processes to run");
+            }
+            else{
+                _Kernel.executeAll();
+            }
         }
 
         public shellPs(){
