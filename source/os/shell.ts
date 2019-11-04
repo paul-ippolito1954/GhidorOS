@@ -549,7 +549,18 @@ module TSOS {
         }
 
         public shellRunAll(){
-            _StdOut.putText("I'm gonna run EVERYTHING");
+            _CPU.scheduling = true;
+
+            //add to running queue
+            console.log("B - Ready length: " + _Kernel.readyQueue.length + ", Running length: " + _Kernel.runningQueue.length);
+            _Kernel.runningQueue = _Kernel.readyQueue.slice(0);
+            console.log("A - Ready length: " + _Kernel.readyQueue.length + ", Running length: " + _Kernel.runningQueue.length);
+
+            //set running pid to args
+            _CPU.runningPID = _Kernel.runningQueue[0].processId;
+            //set program equal to the one we're running
+            _CPU.program = _Kernel.readyQueue[0];
+            
         }
 
         public shellPs(){
