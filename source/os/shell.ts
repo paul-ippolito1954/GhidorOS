@@ -450,14 +450,63 @@ module TSOS {
 
         public shellLoad(){
 
-               _StdOut.putText("Under maintenance");
+               //store the user input in a variable
+            var programInput = (<HTMLInputElement>document.getElementById("taProgramInput")).value;
+            //console.log(programInput);
+
+            //set valid to true
+            var valid = true;
+
+            //regex pattern
+            var hex = new RegExp('([a-fA-F0-9][a-fA-F0-9]([ ]*))+');
+
+            //if no input is in the text area
+            if (programInput == ""){
+                //tell the user and set valid to false.
+                _StdOut.putText("No user program entered.");
+                valid = false;
+                //if something besides valid hex is found
+            } else if (programInput.search(hex) == -1){
+                _StdOut.putText("User code is invalid.");
+                valid = false;
+            } else if (valid == true){
+
+                //put user program in array and check size
+                _userProgram = programInput.split(" ");
+                if (_userProgram.length > 255){
+                    _StdOut.putText("Program too large for available memory space.")
+                }else{
+                    //load into memory
+                    var base = _MemoryManager.loadMem(_userProgram);
+                    console.log("Base on load: " + base);
+                    if (base == -1){
+                        _StdOut.putText("Out of memory.");
+                    }else{
+                        _StdOut.putText("Program loaded into memory with Process ID " + _Pid);
+                        //call kernel to create a new process
+                        _Kernel.createProcess(base);
+                    }
+
+                }
+
+            }
+
         }
 
         public shellStatus(args){
-            //set status equal to input on shell
-            status = args;
-            _StdOut.putText("Setting status equal to " + status);
-            document.getElementById("status").innerHTML = "Status: " + status + " |";
+            
+            // check arguments
+            if (args.length > 0){
+                //clear the hardcoated status
+                _Status = "";
+                //for each item in args
+                for (let item of args){
+                    //add it to the status
+                    _Status += item + " ";
+                }
+            } else{
+                _StdOut.putText("Usage: status <string>  Please supply a string.")
+            }
         }
 
         public shellRun(args){

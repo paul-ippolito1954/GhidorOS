@@ -534,7 +534,7 @@
                 _ReadyQueue.enqueue(_currPcb);
                 cpuCycles = 0;
                 _Scheduler.getNewProc();
-                console.log("current pcb after get new proc: " + _currPcb.PID);
+                console.log("current pcb after getting new proc: " + _currPcb.PID);
                 _Scheduler.setCPU()
             }
     
