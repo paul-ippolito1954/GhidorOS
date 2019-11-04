@@ -468,6 +468,7 @@ var TSOS;
         }
         shellQuantum(args) {
             _StdOut.putText("Setting quantum to " + args);
+            _CPU.quantum = args;
         }
     }
     TSOS.Shell = Shell;
