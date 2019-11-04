@@ -645,8 +645,50 @@ module TSOS {
             }
         }
 
+        /**
+         * kills specified process with pid
+         * @param args 
+         */
         public shellKill(args){
             
+            var pid = args[0];
+
+            var location;
+
+            var found = false;
+
+            if (_currPcb.PID == pid){
+                found = true;
+                location = "current";
+            }
+
+            for (var i = 0; i < _ResidentQueue.getSize(); i++){
+                var temp = _ResidentQueue.q[i];
+                if (pid == temp.PID){
+                    found = true;
+                    location = "resident";
+                }
+            }
+
+            for (var i = 0; i < _ReadyQueue.getSize(); i++){
+                var temp = _ReadyQueue.q[i];
+                if (pid == temp.PID){
+                    found = true;
+                    location = "ready";
+                }
+            }
+
+            if (found){
+                var killInfo  = [];
+                killInfo[0] = pid;
+                killInfo[1] = location;
+                _KernelInterruptQueue.enqueue(new Interrupt(KILL_PROC_IRQ, killInfo));
+                _StdOut.putText("Killing the process");
+            }else{
+                _StdOut.putText("No process with that PID.");
+            }
+
+
         }
 
         public shellKillAll(){
