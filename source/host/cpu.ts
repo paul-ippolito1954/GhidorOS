@@ -69,14 +69,13 @@
                 //update PCB
                 if(this.program.position >= TSOS.MemoryAccessor.memoryLength()){
                     this.terminateProgram();
-                    
                 }
             }
     
             public terminateProgram(): void {
                 //print turnaround time and wait time
                 _StdOut.advanceLine();
-                _StdOut.putText("Turnaround time: " + this.program.turnaround);
+                _StdOut.putText("Turnaround time: " + this.program.turnAround);
                 _StdOut.advanceLine();
                 _StdOut.putText("Wait time: " + this.program.waitTime);
                 _StdOut.advanceLine();

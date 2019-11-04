@@ -562,13 +562,20 @@ module TSOS {
         public shellKill(args){
             _StdOut.putText("I know not why I'm here, all I know;");
             _StdOut.advanceLine();
-            _StdOut.putText("I MUST KILL");
+            _StdOut.putText("I MUST KILL PROCESS " + args);
+            _CPU.program = _Kernel.readyQueue[args];
+            _CPU.terminateProgram();
         }
 
         public shellKillAll(){
             _StdOut.putText("CHITTY CHITTY BANG");
             _StdOut.advanceLine();
             _StdOut.putText("MURDER EVERYTHING");
+
+            // loop through all processes and kill them.
+            for (var i = 0; i < _Kernel.readyQueue.length; i++){
+                _CPU.terminateProgram();
+            }
         }
 
         public shellQuantum(args){

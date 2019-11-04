@@ -65,7 +65,7 @@ var TSOS;
         terminateProgram() {
             //print turnaround time and wait time
             _StdOut.advanceLine();
-            _StdOut.putText("Turnaround time: " + this.program.turnaround);
+            _StdOut.putText("Turnaround time: " + this.program.turnAround);
             _StdOut.advanceLine();
             _StdOut.putText("Wait time: " + this.program.waitTime);
             _StdOut.advanceLine();
