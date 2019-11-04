@@ -146,8 +146,15 @@ var TSOS;
         // OS Utility Routines
         //
         createProcess(pid) {
-            var newProc = new TSOS.ProcessControlBlock(String(pid));
+            //create a new process
+            var newProc = new TSOS.ProcessControlBlock(pid.toString(), TSOS.MemoryManager.allocate());
+            //add it to the ready queue
             this.readyQueue.push(newProc);
+            //update the PCB table
+            TSOS.Control.updatePCB();
+            //set the current program to the new process
+            _CPU.program = newProc;
+            //initialize
             newProc.init();
         }
         krnTrace(msg) {

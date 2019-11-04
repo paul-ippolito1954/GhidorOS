@@ -23,7 +23,6 @@
     
             public runningPID = 0;
             public program;
-            public singleStep = false;
             public quantum = 6;
             public scheduling = true;
     
@@ -60,7 +59,7 @@
                 this.program.status = "Running";
                 //update turnaround time for all programs in ready queue
                 for(var i = 0; i < _Kernel.readyQueue.length; i++){
-                    _Kernel.readyQueue[i].turnaroundTime++;
+                    _Kernel.readyQueue[i].turnaround++;
                     if(_Kernel.readyQueue[i].status != "Running"){
                         _Kernel.readyQueue[i].waitTime++;
                     }
@@ -70,13 +69,14 @@
                 //update PCB
                 if(this.program.position >= TSOS.MemoryAccessor.memoryLength()){
                     this.terminateProgram();
+                    
                 }
             }
     
             public terminateProgram(): void {
                 //print turnaround time and wait time
                 _StdOut.advanceLine();
-                _StdOut.putText("Turnaround time: " + this.program.turnaroundTime);
+                _StdOut.putText("Turnaround time: " + this.program.turnaround);
                 _StdOut.advanceLine();
                 _StdOut.putText("Wait time: " + this.program.waitTime);
                 _StdOut.advanceLine();
@@ -327,7 +327,8 @@
                 }
                 //update CPU and PCB
                 TSOS.Control.updateCPU(this.program.position, this.program.Acc, this.program.IR, this.program.Xreg, this.program.Yreg, this.program.Zflag);
-                TSOS.Control.updatePCB(this.program.processId, this.program.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+                this.program.updateValues(this.program.status,this.program.position, this.program.Acc, this.program.IR, this.program.Xreg, this.program.Yreg, this.program.Zflag);
+                TSOS.Control.updatePCB();
             }
         }
     }

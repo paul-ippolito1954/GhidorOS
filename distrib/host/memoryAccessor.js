@@ -15,7 +15,6 @@ var TSOS;
                 _Memory.memArray[_CPU.program.segment][position] = "0" + val;
             else
                 _Memory.memArray[_CPU.program.segment][position] = val;
-            //console.log("Update mem: " + _Memory.memArray.toString());
             TSOS.Control.clearTable();
             TSOS.Control.loadTable();
         }

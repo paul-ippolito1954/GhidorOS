@@ -11,7 +11,7 @@ var TSOS;
             var position = 0;
             for (var i = 0; i < input.length; i++) {
                 if (input.charAt(i) != " ") {
-                    _Memory.memArray[_CPU.program.segment][position] = input.substring(i, i + 2).toUpperCase();
+                    _Memory.memArray[_CPU.program.section][position] = input.substring(i, i + 2).toUpperCase();
                     i += 2;
                     position++;
                 }
@@ -20,6 +20,28 @@ var TSOS;
             console.log("After: " + _Memory.memArray.toString() + " length: " + this.endProgram);
             TSOS.Control.clearTable();
             TSOS.Control.loadTable();
+        }
+        /**
+         * allocate allocates the different sections of memory.
+         * it checks and returns the first free section it finds, or if they're
+         * all full, returns 99, which is an error
+         */
+        static allocate() {
+            if (_Memory.section0Free) {
+                _Memory.section0Free = false;
+                return 0;
+            }
+            else if (_Memory.section1Free) {
+                _Memory.section1Free = false;
+                return 1;
+            }
+            else if (_Memory.section2Free) {
+                _Memory.section2Free = false;
+                return 2;
+            }
+            else {
+                return 99;
+            }
         }
         /**
          * scanMemory

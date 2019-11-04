@@ -16,7 +16,7 @@
                 var position = 0;
                 for (var i = 0; i < input.length; i++) {
                     if(input.charAt(i) != " ") {
-                        _Memory.memArray[_CPU.program.segment][position] = input.substring(i, i + 2).toUpperCase();
+                        _Memory.memArray[_CPU.program.section][position] = input.substring(i, i + 2).toUpperCase();
                         i+=2;
                         position++;
                     }

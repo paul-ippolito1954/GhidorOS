@@ -102,8 +102,6 @@ var TSOS;
             //loop down to delete every row
             for (var i = this.tbl.rows.length - 1; i >= 0; i--)
                 this.tbl.deleteRow(i);
-            //make the table disappear
-            tableDiv.removeChild(this.tbl);
         }
         //method to update the memory table
         static loadTable() {
@@ -154,15 +152,85 @@ var TSOS;
             //reset counters to 0
             this.memArrayPosition = 0;
         }
-        static updatePCB(pid, status, pc, acc, ir, xreg, yreg, zflag) {
-            document.getElementById("pcbPID").innerHTML = pid;
-            document.getElementById("pcbStatus").innerHTML = status;
-            document.getElementById("pcbPC").innerHTML = pc;
-            document.getElementById("pcbAcc").innerHTML = acc;
-            document.getElementById("pcbIR").innerHTML = ir;
-            document.getElementById("pcbXreg").innerHTML = xreg;
-            document.getElementById("pcbYreg").innerHTML = yreg;
-            document.getElementById("pcbZflag").innerHTML = zflag;
+        static updatePCB() {
+            this.clearPCB();
+            //find table div and set id
+            var divPCB = document.getElementById("divPCB");
+            this.tblPCB.setAttribute("id", "tablePCB");
+            //loop through for the length of the ready queue to get PCB count
+            for (var i = 0; i <= _Kernel.readyQueue.length; i++) {
+                var tr = this.tblPCB.insertRow();
+                //create 8 columns in those rows
+                for (var j = 0; j < 8; j++) {
+                    var td = tr.insertCell();
+                    if (i == 0) {
+                        //add titles to cell if first row
+                        switch (j) {
+                            case 0:
+                                td.appendChild(document.createTextNode("PID"));
+                                break;
+                            case 1:
+                                td.appendChild(document.createTextNode("Status"));
+                                break;
+                            case 2:
+                                td.appendChild(document.createTextNode("PC"));
+                                break;
+                            case 3:
+                                td.appendChild(document.createTextNode("IR"));
+                                break;
+                            case 4:
+                                td.appendChild(document.createTextNode("Acc"));
+                                break;
+                            case 5:
+                                td.appendChild(document.createTextNode("X"));
+                                break;
+                            case 6:
+                                td.appendChild(document.createTextNode("Y"));
+                                break;
+                            case 7:
+                                td.appendChild(document.createTextNode("ZF"));
+                                break;
+                        }
+                    }
+                    else {
+                        if (_Kernel.readyQueue[i - 1].status != "Terminated") {
+                            //add appropriate values to cell
+                            switch (j) {
+                                case 0:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].processId));
+                                    break;
+                                case 1:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].status));
+                                    break;
+                                case 2:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].position));
+                                    break;
+                                case 3:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].IR));
+                                    break;
+                                case 4:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Acc));
+                                    break;
+                                case 5:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Xreg));
+                                    break;
+                                case 6:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Yreg));
+                                    break;
+                                case 7:
+                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Zflag));
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            //add to page
+            divPCB.appendChild(this.tblPCB);
+        }
+        static clearPCB() {
+            for (var i = this.tblPCB.rows.length - 1; i >= 0; i--)
+                this.tblPCB.deleteRow(i);
         }
         static updateCPU(PC, Acc, IR, Xreg, Yreg, Zflag) {
             document.getElementById("PC").innerHTML = PC;
@@ -174,6 +242,7 @@ var TSOS;
         }
     }
     Control.tbl = document.createElement('table');
+    Control.tblPCB = document.createElement('table');
     Control.memArrayPosition = 0;
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));

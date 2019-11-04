@@ -13,9 +13,12 @@
 var TSOS;
 (function (TSOS) {
     class ProcessControlBlock {
-        constructor(processId, status = "Ready", PC = 0, Acc = "0", IR = "0", Xreg = "0", Yreg = "0", Zflag = "0", waitTime = 0, turnAround = 0) {
+        constructor(processId, segment, priority = 0, status = "Ready", position = 0, PC = 0, Acc = "0", IR = "0", Xreg = "0", Yreg = "0", Zflag = "0", waitTime = 0, turnAround = 0) {
             this.processId = processId;
+            this.segment = segment;
+            this.priority = priority;
             this.status = status;
+            this.position = position;
             this.PC = PC;
             this.Acc = Acc;
             this.IR = IR;
@@ -27,6 +30,7 @@ var TSOS;
         }
         init() {
             this.status = "Ready";
+            this.position = 0;
             this.PC = 0;
             this.Acc = "0";
             this.IR = "0";
@@ -35,7 +39,15 @@ var TSOS;
             this.Zflag = "0";
             this.waitTime = 0;
             this.turnAround = 0;
-            TSOS.Control.updatePCB(this.processId, this.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+        }
+        updateValues(status, pc, acc, ir, xreg, yreg, zflag) {
+            this.status = status;
+            this.position = pc;
+            this.Acc = acc;
+            this.IR = ir;
+            this.Xreg = xreg;
+            this.Yreg = yreg;
+            this.Zflag = zflag;
         }
     }
     TSOS.ProcessControlBlock = ProcessControlBlock;

@@ -141,6 +141,9 @@ module TSOS {
                     _krnKeyboardDriver.isr(params);   // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
+
+                case CONTEXT_SWITCH:
+                    _Scheduler.contextSwitch(params);
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }
@@ -172,8 +175,15 @@ module TSOS {
         //
 
         public createProcess(pid: number){
-            var newProc = new ProcessControlBlock(String(pid));
+            //create a new process
+            var newProc = new ProcessControlBlock(pid.toString(), TSOS.MemoryManager.allocate());
+            //add it to the ready queue
             this.readyQueue.push(newProc);
+            //update the PCB table
+            TSOS.Control.updatePCB();
+            //set the current program to the new process
+            _CPU.program = newProc;
+            //initialize
             newProc.init();
         }
 

@@ -17,7 +17,10 @@
         export class ProcessControlBlock {
     
             constructor(public processId: string,
+                        public segment: number,
+                        public priority: number = 0,
                         public status: string = "Ready",
+                        public position: number = 0,
                         public PC: number = 0,
                         public Acc: string = "0",
                         public IR: string = "0",
@@ -30,6 +33,7 @@
     
             public init(): void {
                 this.status = "Ready";
+                this.position = 0;
                 this.PC = 0;
                 this.Acc = "0";
                 this.IR = "0";
@@ -39,7 +43,16 @@
                 this.waitTime = 0;
                 this.turnAround = 0;
     
-                TSOS.Control.updatePCB(this.processId, this.status, String(this.PC), this.Acc, this.IR, this.Xreg, this.Yreg, this.Zflag);
+            }
+
+            public updateValues(status: string, pc: number, acc: string, ir: string, xreg: string, yreg: string, zflag: string):void{
+                this.status = status;
+                this.position = pc;
+                this.Acc = acc;
+                this.IR = ir;
+                this.Xreg = xreg;
+                this.Yreg = yreg;
+                this.Zflag = zflag;
             }
     
         }
