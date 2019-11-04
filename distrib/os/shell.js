@@ -377,7 +377,7 @@ var TSOS;
                     var base = _MemoryManager.loadMem(_userProgram);
                     console.log("Base on load: " + base);
                     if (base == -1) {
-                        _StdOut.putText("Out of memory.");
+                        _StdOut.putText("No space in memory left.");
                     }
                     else {
                         _StdOut.putText("Program loaded into memory with Process ID " + _Pid);
@@ -403,7 +403,25 @@ var TSOS;
             }
         }
         shellRun(args) {
-            _StdOut.putText("Under maintenance");
+            // set pid to first argument
+            var pid = args[0];
+            var valid = false;
+            // length of resident queue
+            var resLen = _ResidentQueue.getSize();
+            // loop through to see if valid PIDs
+            for (var i = 0; i < resLen; i++) {
+                var temp = _ResidentQueue.q[i].PID;
+                if (temp == pid.toString()) {
+                    valid = true;
+                    break;
+                }
+            }
+            if (valid) {
+                _Kernel.executeProcess(pid);
+            }
+            else {
+                _StdOut.putText("Not a valid Pid");
+            }
         }
         shellClearMem() {
             _StdOut.putText("Under maintenance");
