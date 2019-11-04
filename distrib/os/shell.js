@@ -469,8 +469,53 @@ var TSOS;
                 _Kernel.executeAll();
             }
         }
+        /**
+         * Displays information for all processes and their current states
+         */
         shellPs() {
-            _StdOut.putText("Under maintenance");
+            var resLen = _ResidentQueue.getSize();
+            console.log("Len res: " + resLen);
+            var readyLen = _ReadyQueue.getSize();
+            console.log("Len ready: " + readyLen);
+            for (var j = 0; j < readyLen; j++) {
+                console.log(_ReadyQueue.q[j]);
+            }
+            if (_currPcb.PID != "-") {
+                _StdOut.putText(_currPcb.PID + ": " + _currPcb.state);
+                _StdOut.advanceLine();
+            }
+            if ((resLen == 0) && (readyLen == 0)) {
+                _StdOut.putText("No current processes loaded.");
+            }
+            else if ((resLen > 0) && (readyLen == 0)) {
+                console.log("res > 0, ready = 0");
+                for (var i = 0; i < resLen; i++) {
+                    var pcb = _ResidentQueue.q[i];
+                    _StdOut.putText(pcb.PID + ": " + pcb.state);
+                    _StdOut.advanceLine();
+                }
+            }
+            else if ((resLen == 0) && (readyLen > 0)) {
+                console.log("res = 0, ready > 0");
+                for (var i = 0; i < readyLen; i++) {
+                    var pcb = _ReadyQueue.q[i];
+                    _StdOut.putText(pcb.PID + ": " + pcb.state);
+                    _StdOut.advanceLine();
+                }
+            }
+            else {
+                for (var i = 0; i < readyLen; i++) {
+                    console.log("res > 0, ready > 0");
+                    var pcb = _ReadyQueue.q[i];
+                    _StdOut.putText(pcb.PID + ": " + pcb.state);
+                    _StdOut.advanceLine();
+                }
+                for (var i = 0; i < resLen; i++) {
+                    var pcb = _ResidentQueue.q[i];
+                    _StdOut.putText(pcb.PID + ": " + pcb.state);
+                    _StdOut.advanceLine();
+                }
+            }
         }
         shellKill(args) {
         }
