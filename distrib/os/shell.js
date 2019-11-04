@@ -448,6 +448,7 @@ var TSOS;
         shellClearMem() {
             if (_CPU.isExecuting == false) {
                 _Kernel.clearMemory();
+                _StdOut.putText("Memory successfully cleared");
             }
             else {
                 _StdOut.putText("Cannot clear memory while program is running.");

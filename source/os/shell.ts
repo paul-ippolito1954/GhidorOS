@@ -564,7 +564,10 @@ module TSOS {
 
             if (_CPU.isExecuting == false){
                 _Kernel.clearMemory();
-            }else{
+                _StdOut.putText("Memory successfully cleared");
+            }
+            
+            else{
                 _StdOut.putText("Cannot clear memory while program is running.");
             }
         }
