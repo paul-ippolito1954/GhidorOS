@@ -437,7 +437,10 @@ var TSOS;
             _StdOut.putText("I'm gonna run EVERYTHING");
         }
         shellPs() {
-            _StdOut.putText("Wanna see some processes????");
+            for (var i = 0; i < _Kernel.readyQueue.length; i++) {
+                _StdOut.putText("Process " + _Kernel.readyQueue[i].processId + " is " + _Kernel.readyQueue[i].status);
+                _StdOut.advanceLine();
+            }
         }
         shellKill(args) {
             _StdOut.putText("I know not why I'm here, all I know;");

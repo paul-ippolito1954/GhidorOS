@@ -553,7 +553,10 @@ module TSOS {
         }
 
         public shellPs(){
-            _StdOut.putText("Wanna see some processes????");
+            for(var i = 0; i < _Kernel.readyQueue.length; i++){
+                _StdOut.putText("Process " + _Kernel.readyQueue[i].processId + " is " + _Kernel.readyQueue[i].status);
+                _StdOut.advanceLine();
+            }
         }
 
         public shellKill(args){
