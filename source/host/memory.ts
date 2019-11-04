@@ -110,8 +110,8 @@
                     "00","00","00","00","00","00","00","00"]
         ];
                         
-            public memArrayPosition = 0;
-
+            // booleans to check open or loaded sections of memory
+            // if true, open, if false, NOT OPEN for use
             public section0Free = true;
             public section1Free = true;
             public section2Free = true;

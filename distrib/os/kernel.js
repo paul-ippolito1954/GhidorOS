@@ -17,6 +17,8 @@ var TSOS;
         constructor() {
             // list for readyQueue
             this.readyQueue = [];
+            // running queue list
+            this.runningQueue = [];
         }
         //
         // OS Startup and Shutdown Routines

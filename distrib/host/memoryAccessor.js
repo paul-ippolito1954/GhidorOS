@@ -7,22 +7,27 @@ var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
         static readMemory(position) {
-            return _Memory.memArray[position];
+            return _Memory.memArray[_CPU.program.segment][position];
         }
         static writeMemory(position, val) {
-            console.log("Current val: " + _Memory.memArray[position] + ", pos: " + position + ", updated val: " + val);
-            _Memory.memArray[position] = val;
-            console.log("Update mem: " + _Memory.memArray.toString());
+            val = (+val).toString(16).toUpperCase();
+            if (val.length == 1)
+                _Memory.memArray[_CPU.program.segment][position] = "0" + val;
+            else
+                _Memory.memArray[_CPU.program.segment][position] = val;
+            //console.log("Update mem: " + _Memory.memArray.toString());
             TSOS.Control.clearTable();
             TSOS.Control.loadTable();
         }
         static clearMem() {
-            for (var i = 0; i < 256; i++) {
-                _Memory.memArray[i] = "00";
+            for (var j = 0; j < 3; j++) {
+                for (var i = 0; i < 256; i++) {
+                    _Memory.memArray[j][i] = "00";
+                }
             }
         }
         static memoryLength() {
-            return _Memory.memArray.length;
+            return _Memory.memArray[0].length;
         }
     }
     TSOS.MemoryAccessor = MemoryAccessor;

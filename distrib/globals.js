@@ -46,6 +46,7 @@ var _MemoryManager = null;
 // UI
 var _Console;
 var _OsShell;
+var _Scheduler;
 // At least this OS is not trying to kill you. (Yet.)
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
