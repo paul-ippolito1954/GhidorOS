@@ -348,41 +348,7 @@ var TSOS;
             _Kernel.krnTrapError("Error caused by YOU");
         }
         shellLoad() {
-            // Load text in the User Program Input textarea
-            var input = (document.getElementById("taProgramInput").value);
-            var valid = true;
-            _StdOut.putText("Loading...");
-            _StdOut.advanceLine();
-            // tests input against regex for hex, displays error for specific characters
-            // or if no text/valid hex is entered
-            for (var i = 0; i < input.length; i++) {
-                if (((i + 1) % 3 == 0) && input.charAt(i) != " ") {
-                    _StdOut.putText("Must add a space at position " + i);
-                    valid = false;
-                    break;
-                }
-                if (input.charAt(i).match("-?[0-9a-fA-F\\s]+")) {
-                    valid = true;
-                }
-                else {
-                    _StdOut.putText("Character " + input.charAt(i) + " at position " + i + " is not valid hex input.");
-                    valid = false;
-                    break;
-                }
-            }
-            // No input? That's an error
-            if (input == "") {
-                valid = false;
-                _StdOut.putText("No text entered, not valid hex input.");
-            }
-            // user actually put in valid hex, assign process Id, make process, load to memory
-            if (valid) {
-                _OsShell.pids++;
-                _StdOut.putText("Loaded with pid " + String(_OsShell.pids));
-                TSOS.MemoryManager.updateMemory(input.toString());
-                // create process and update the PCB on browser
-                _Kernel.createProcess(_OsShell.pids);
-            }
+            _StdOut.putText("Under maintenance");
         }
         shellStatus(args) {
             //set status equal to input on shell
@@ -391,84 +357,26 @@ var TSOS;
             document.getElementById("status").innerHTML = "Status: " + status + " |";
         }
         shellRun(args) {
-            _CPU.scheduling = false;
-            var validPID = false;
-            //if the arg matches a process id that's in the ready queue and it hasn't been run yet, set to valid
-            for (var i = 0; i < _Kernel.readyQueue.length; i++) {
-                console.log("Stat " + _Kernel.readyQueue[i].processId + ": " + _Kernel.readyQueue[i].status);
-                if (_Kernel.readyQueue[i].processId == args && _Kernel.readyQueue[i].status == "Ready")
-                    validPID = true;
-            }
-            //if valid
-            if (validPID) {
-                //set running pid to args
-                _CPU.runningPID = args;
-                //set program equal to the one we're running
-                _CPU.program = _Kernel.readyQueue[args];
-                //add to running queue
-                _Kernel.runningQueue.push(_CPU.program);
-                //reset CPU
-                _CPU.position = 0;
-                _CPU.Acc = "0";
-                _CPU.IR = "0";
-                _CPU.Xreg = "0";
-                _CPU.Yreg = "0";
-                _CPU.Zflag = "0";
-                _CPU.isExecuting = false;
-                TSOS.Control.updateCPU(String(_CPU.position), _CPU.Acc, _CPU.IR, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
-            }
-            else {
-                _StdOut.putText("Not a valid PID");
-            }
+            _StdOut.putText("Under maintenance");
         }
         shellClearMem() {
-            //mark all as free
-            _Memory.section0Free = true;
-            _Memory.section1Free = true;
-            _Memory.section2Free = true;
-            //clear memory
-            TSOS.MemoryAccessor.clearMem();
-            _StdOut.putText("Cleared mem");
-            //clear table and reload it
-            TSOS.Control.clearTable();
-            TSOS.Control.loadTable();
+            _StdOut.putText("Under maintenance");
         }
         shellRunAll() {
-            _CPU.scheduling = true;
-            //add to running queue
-            console.log("B - Ready length: " + _Kernel.readyQueue.length + ", Running length: " + _Kernel.runningQueue.length);
-            _Kernel.runningQueue = _Kernel.readyQueue.slice(0);
-            console.log("A - Ready length: " + _Kernel.readyQueue.length + ", Running length: " + _Kernel.runningQueue.length);
-            //set running pid to args
-            _CPU.runningPID = _Kernel.runningQueue[0].processId;
-            //set program equal to the one we're running
-            _CPU.program = _Kernel.readyQueue[0];
+            _StdOut.putText("Under maintenance");
         }
         shellPs() {
-            for (var i = 0; i < _Kernel.readyQueue.length; i++) {
-                _StdOut.putText("Process " + _Kernel.readyQueue[i].processId + " is " + _Kernel.readyQueue[i].status);
-                _StdOut.advanceLine();
-            }
+            _StdOut.putText("Under maintenance");
         }
         shellKill(args) {
-            _StdOut.putText("I know not why I'm here, all I know;");
-            _StdOut.advanceLine();
-            _StdOut.putText("I MUST KILL PROCESS " + args);
-            _CPU.program = _Kernel.readyQueue[args];
-            _CPU.terminateProgram();
         }
         shellKillAll() {
             _StdOut.putText("CHITTY CHITTY BANG");
             _StdOut.advanceLine();
             _StdOut.putText("MURDER EVERYTHING");
-            // loop through all processes and kill them.
-            for (var i = 0; i < _Kernel.readyQueue.length; i++) {
-                _CPU.terminateProgram();
-            }
         }
         shellQuantum(args) {
-            _StdOut.putText("Setting quantum to " + args);
-            _CPU.quantum = args;
+            _StdOut.putText("Under maintenance");
         }
     }
     TSOS.Shell = Shell;

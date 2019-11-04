@@ -1,53 +1,38 @@
 ///<reference path="../globals.ts" />
 /* ------------
-     ProcessControlBlock.ts
+     Pcb.ts
      Requires global.ts.
-     Routines for the host CPU simulation, NOT for the OS itself.
-     In this manner, it's A LITTLE BIT like a hypervisor,
-     in that the Document environment inside a browser is the "bare metal" (so to speak) for which we write code
-     that hosts our client OS. But that analogy only goes so far, and the lines are blurred, because we are using
-     TypeScript/JavaScript in both the host and client environments.
-     This code references page numbers in the text book:
-     Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
+     Process control block for creating new processes
      ------------ */
 var TSOS;
 (function (TSOS) {
     class ProcessControlBlock {
-        constructor(processId, segment, priority = 0, status = "Ready", position = 0, PC = 0, Acc = "0", IR = "0", Xreg = "0", Yreg = "0", Zflag = "0", waitTime = 0, turnAround = 0) {
-            this.processId = processId;
-            this.segment = segment;
-            this.priority = priority;
-            this.status = status;
-            this.position = position;
+        constructor(PID, base, state, PC, IR, turnaround, waittime, Acc, Xreg, Yreg, Zflag) {
+            this.PID = PID;
+            this.base = base;
+            this.state = state;
             this.PC = PC;
-            this.Acc = Acc;
             this.IR = IR;
+            this.turnaround = turnaround;
+            this.waittime = waittime;
+            this.Acc = Acc;
             this.Xreg = Xreg;
             this.Yreg = Yreg;
             this.Zflag = Zflag;
-            this.waitTime = waitTime;
-            this.turnAround = turnAround;
         }
         init() {
-            this.status = "Ready";
-            this.position = 0;
+            console.log("In init");
+            this.PID = "-";
+            this.base = 0;
+            this.state = "-";
             this.PC = 0;
-            this.Acc = "0";
-            this.IR = "0";
-            this.Xreg = "0";
-            this.Yreg = "0";
-            this.Zflag = "0";
-            this.waitTime = 0;
-            this.turnAround = 0;
-        }
-        updateValues(status, pc, acc, ir, xreg, yreg, zflag) {
-            this.status = status;
-            this.position = pc;
-            this.Acc = acc;
-            this.IR = ir;
-            this.Xreg = xreg;
-            this.Yreg = yreg;
-            this.Zflag = zflag;
+            this.IR = "-";
+            this.turnaround = 0;
+            this.waittime = 0;
+            this.Acc = 0;
+            this.Xreg = 0;
+            this.Yreg = 0;
+            this.Zflag = 0;
         }
     }
     TSOS.ProcessControlBlock = ProcessControlBlock;

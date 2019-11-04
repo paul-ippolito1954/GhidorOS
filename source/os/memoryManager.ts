@@ -1,78 +1,48 @@
 ///<reference path="../globals.ts" />
 
-/* ------------
-     MemoryManager.ts
-     Requires global.ts.
-     ------------ */
+module TSOS {
 
-     module TSOS {
+    export class MemoryManager {
 
-        export class MemoryManager {
-    
-            public static endProgram;
-    
-            public static updateMemory(input: string):void{
-                console.log("Before: " + _Memory.memArray.toString());
-                var position = 0;
-                for (var i = 0; i < input.length; i++) {
-                    if(input.charAt(i) != " ") {
-                        _Memory.memArray[_CPU.program.segment][position] = input.substring(i, i + 2).toUpperCase();
-                        i+=2;
-                        position++;
-                    }
+        //set bases for 3 sections
+        public base1: number = 0;
+        public base2: number = 256;
+        public base3: number = 512;
+        public limitReg: number = 255;
+
+        public loadMem(userProgram){
+
+            //put the program in the first available area of memory and return the base value
+            //section 1 of memory
+            if (_Memory.memArray[this.base1] == "00"){
+                for (var i = 0; i < userProgram.length; i++){
+                    _Memory.memArray[this.base1 + i] = userProgram[i];
+
                 }
-                this.endProgram = position;
-                console.log("After: " + _Memory.memArray.toString() + " length: " + this.endProgram);
-                TSOS.Control.clearTable();
-                TSOS.Control.loadTable();
-            }
+                return this.base1;
 
-           /**
-            * allocate allocates the different sections of memory.
-            * it checks and returns the first free section it finds, or if they're
-            * all full, returns 99, which is an error
-            */
-           public static allocate(): number {
-
-            if(_Memory.section0Free){
-                _Memory.section0Free = false;
-                return 0;
-            }
-
-            else if (_Memory.section1Free){
-                _Memory.section1Free = false;
-                return 1;
-            }
-
-            else if (_Memory.section2Free){
-                _Memory.section2Free = false;
-                return 2;
-            }
-
-            else{
-                return 99;
-            }
-           }
-
-            /**
-             * scanMemory
-             * This method checks the three sections of memory to see
-             * whether or not they can be loaded into or not. This will
-             * also check if memory is full. This will be called upon
-             * a shell load command. If any sections are free, the program
-             * will be loaded into there. If none of the sections are free,
-             * the user will be informed that memory is full
-             */
-
-             public static scanMemory(): boolean {
-
-                if(_Memory.section0Free || _Memory.section1Free || _Memory.section2Free){
-                    return true;
+             //section 2 of memory
+            }else if (_Memory.memArray[this.base2] == "00"){
+                for (var i = 0; i < userProgram.length; i++){
+                    _Memory.memArray[this.base2 + i] = userProgram[i];
                 }
-                else{
-                    _StdOut.putText("Memory is full, loading failed");
-                    return false;
+                return this.base2;
+
+            //section 3 of memory
+            }else if (_Memory.memArray[this.base3] == "00"){
+                for (var i = 0; i < userProgram.length; i++){
+                    _Memory.memArray[this.base3 + i] = userProgram[i];
                 }
-             }
+                return this.base3;
+
+            }else{
+                //return -1 if no memory is available
+                console.log("Out of memory space.");
+                return -1;
+            }
+
+            //console.log("User program in memory: " + _Memory.mainMem[0]);
         }
+
     }
+}

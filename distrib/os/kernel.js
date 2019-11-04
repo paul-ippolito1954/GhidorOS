@@ -2,24 +2,15 @@
 ///<reference path="queue.ts" />
 /* ------------
      Kernel.ts
-
      Requires globals.ts
               queue.ts
-
      Routines for the Operating System, NOT the host.
-
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
 var TSOS;
 (function (TSOS) {
     class Kernel {
-        constructor() {
-            // list for readyQueue
-            this.readyQueue = [];
-            // running queue list
-            this.runningQueue = [];
-        }
         //
         // OS Startup and Shutdown Routines
         //
@@ -29,9 +20,6 @@ var TSOS;
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
             _KernelInputQueue = new TSOS.Queue(); // Where device input lands before being processed out somewhere.
-            //Create new Memory Instance, call constructor
-            _Memory = new TSOS.Memory();
-            _Memory.init();
             // Initialize the console.
             _Console = new TSOS.Console(); // The command line interface / console I/O device.
             _Console.init();
@@ -46,8 +34,18 @@ var TSOS;
             //
             // ... more?
             //
-            //set status
-            document.getElementById("status").innerHTML = "Status: Running | ";
+            //memory manager
+            _MemoryManager = new TSOS.MemoryManager();
+            _CPU = new TSOS.Cpu();
+            _CPU.init();
+            _Memory = new TSOS.Memory();
+            _Memory.init();
+            _MemoryAccessor = new TSOS.MemoryAccessor();
+            _Scheduler = new TSOS.Scheduler();
+            //pcb setting in bootstrap
+            _currPcb = new TSOS.ProcessControlBlock("-", 0, "-", 0, "-", 0, 0, 0, 0, 0, 0);
+            _ResidentQueue = new TSOS.Queue();
+            _ReadyQueue = new TSOS.Queue();
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
             this.krnTrace("Enabling the interrupts.");
             this.krnEnableInterrupts();
@@ -73,6 +71,7 @@ var TSOS;
             this.krnTrace("end shutdown OS");
         }
         krnOnCPUClockPulse() {
+            //console.log("current pcb id in krnclockpulse: " + _currPcb.PID);
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
@@ -85,11 +84,29 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
-                _CPU.cycle();
+                //console.log("In kernel in cycle curr pcb pid: " + _currPcb.PID)
+                if (singleStepMode == true) {
+                    if (step == true) {
+                        _CPU.cycle();
+                        if (runall == true) {
+                            _Scheduler.schedule();
+                            _Scheduler.updateWaitAndTurnaround();
+                        }
+                        step = false;
+                    }
+                }
+                else {
+                    _CPU.cycle();
+                    if (runall == true) {
+                        _Scheduler.schedule();
+                        _Scheduler.updateWaitAndTurnaround();
+                    }
+                }
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
             }
+            TSOS.Control.createMemoryTable();
         }
         //
         // Interrupt Handling
@@ -120,8 +137,25 @@ var TSOS;
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
-                case CONTEXT_SWITCH:
-                    _Scheduler.contextSwitch(params);
+                case OPCODE_ERROR_IRQ:
+                    _StdOut.putText(params);
+                    this.exitProcess(_currPcb.PID);
+                    break;
+                case OUTPUT_IRQ:
+                    _StdOut.putText(params);
+                    break;
+                case COMPLETE_PROC_IRQ:
+                    this.exitProcess(params);
+                    break;
+                case CONTEXT_SWITCH_IRQ:
+                    this.contextSwitch();
+                    break;
+                case KILL_PROC_IRQ:
+                    this.killProcess(params[0], params[1]);
+                    break;
+                case MEMORY_ACCESS_IRQ:
+                    _StdOut.putText("Memory access request out of bounds.");
+                    this.killProcess(params[0], params[1]);
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }
@@ -144,21 +178,232 @@ var TSOS;
         // - ReadFile
         // - WriteFile
         // - CloseFile
+        //create a new process
+        createProcess(base) {
+            //create a new process control block based on base of program in memory
+            var newProcess = new TSOS.ProcessControlBlock(_Pid.toString(), base, "Resident", 0, "-", 0, 0, 0, 0, 0, 0);
+            //update pcb table
+            TSOS.Control.updatePCBTable(newProcess.PID, newProcess.state, newProcess.PC, newProcess.IR, newProcess.Acc, newProcess.Xreg, newProcess.Yreg, newProcess.Zflag, newProcess.base);
+            //update pid
+            _Pid++;
+            //add new process to resident queue
+            _ResidentQueue.enqueue(newProcess);
+            //print to test
+            for (var i = 0; i < _ResidentQueue.getSize(); i++) {
+                console.log(_ResidentQueue.q[i]);
+            }
+        }
+        //execute a specified process
+        executeProcess(pid) {
+            //find the correct process in the resident queue based on pid
+            var resLen = _ResidentQueue.getSize();
+            for (var i = 0; i < resLen; i++) {
+                //set it to a global pcb variable
+                _currPcb = _ResidentQueue.dequeue();
+                //console.log("regular execution pcb pid: " + _currPcb.PID);
+                if (_currPcb.PID == pid.toString()) {
+                    //console.log("currpcb pid in id statement: " + _currPcb.PID)
+                    //change the state and set executing to true; break out of loop
+                    _currPcb.state = "Running";
+                    _CPU.isExecuting = true;
+                    break;
+                }
+                else {
+                    _ResidentQueue.enqueue(_currPcb);
+                }
+            }
+            for (var i = 0; i < _ResidentQueue.getSize(); i++) {
+                console.log(_ResidentQueue.q[i]);
+            }
+            //console.log("Current pcb pid at end of execute process: " + _currPcb.PID);
+        }
+        //execute all processes
+        executeAll() {
+            var resLength = _ResidentQueue.getSize();
+            //move everthing from the resident queue to the ready queue
+            for (var i = 0; i < resLength; i++) {
+                var temp = _ResidentQueue.dequeue();
+                _ReadyQueue.enqueue(temp);
+            }
+            //set runall to true
+            runall = true;
+            //take the first pcb off the ready queue and set it to _currPcb
+            _currPcb = _ReadyQueue.dequeue();
+            //console.log("IN kernel - curr PCB:" + _currPcb.PID);
+            _currPcb.state = "Running";
+            _CPU.isExecuting = true;
+        }
+        //exit a process
+        exitProcess(pid) {
+            console.log("Process exited");
+            _StdOut.advanceLine();
+            _StdOut.putText("Process: " + pid);
+            _StdOut.advanceLine();
+            _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
+            _StdOut.advanceLine();
+            _StdOut.putText("Wait Time: " + _currPcb.waittime);
+            //advance line and put prompt
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
+            //set state to terminated and executing to false
+            _currPcb.state = "Terminated";
+            //reset clock cycles
+            cpuCycles = 0;
+            TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
+            //reset main mem using base
+            var base = _currPcb.base;
+            console.log("In exit: " + _currPcb.base);
+            for (var j = base; j < base + 255; j++) {
+                _Memory.memArray[j] = "00";
+            }
+            if (_ReadyQueue.isEmpty()) {
+                _CPU.isExecuting = false;
+                _CPU.PC = 0;
+                _CPU.IR = "-";
+                _CPU.Acc = 0;
+                _CPU.Xreg = 0;
+                _CPU.Yreg = 0;
+                _CPU.Zflag = 0;
+                _currPcb.init();
+            }
+            else {
+                _currPcb = _ReadyQueue.dequeue();
+                _CPU.PC = _currPcb.PC;
+                _CPU.IR = _currPcb.IR;
+                _CPU.Acc = _currPcb.Acc;
+                _CPU.Xreg = _currPcb.Xreg;
+                _CPU.Yreg = _currPcb.Yreg;
+                _CPU.Zflag = _currPcb.Zflag;
+            }
+            TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
+            for (var i = 0; i < _ReadyQueue.getSize(); i++) {
+                console.log(_ReadyQueue.q[i]);
+            }
+        }
+        killProcess(pid, loc) {
+            var temp;
+            if (loc == "current") {
+                _StdOut.advanceLine();
+                _StdOut.putText("PID: " + _currPcb.PID);
+                _StdOut.advanceLine();
+                _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
+                _StdOut.advanceLine();
+                _StdOut.putText("Wait Time: " + _currPcb.waittime);
+                //advance line and put prompt
+                _StdOut.advanceLine();
+                _OsShell.putPrompt();
+                _currPcb.state = "Terminated";
+                //reset cpu cycles
+                cpuCycles = 0;
+                //reset main mem using base
+                var base = _currPcb.base;
+                for (var j = base; j < base + 255; j++) {
+                    _Memory.memArray[j] = "00";
+                }
+                TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
+                if (_ReadyQueue.getSize() > 0) {
+                    _currPcb = _ReadyQueue.dequeue();
+                    _CPU.PC = _currPcb.PC;
+                    _CPU.IR = _currPcb.IR;
+                    _CPU.Acc = _currPcb.Acc;
+                    _CPU.Xreg = _currPcb.Xreg;
+                    _CPU.Yreg = _currPcb.Yreg;
+                    _CPU.Zflag = _currPcb.Zflag;
+                }
+                else {
+                    _CPU.isExecuting = false;
+                    _currPcb.init();
+                    _CPU.init();
+                    _CPU.PC = 0;
+                    _CPU.IR = "-";
+                    _CPU.Acc = 0;
+                    _CPU.Xreg = 0;
+                    _CPU.Yreg = 0;
+                    _CPU.Zflag = 0;
+                }
+                TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
+            }
+            else if (loc == "resident") {
+                for (var i = 0; i < _ResidentQueue.getSize(); i++) {
+                    temp = _ResidentQueue.dequeue();
+                    if (pid == temp.PID) {
+                        break;
+                    }
+                    else {
+                        _ResidentQueue.enqueue(temp);
+                    }
+                }
+                temp.state = "Terminated";
+                TSOS.Control.updatePCBTable(temp.PID, temp.state, temp.PC, temp.IR, temp.Acc.toString(16).toUpperCase(), temp.Xreg.toString(16).toUpperCase(), temp.Yreg.toString(16).toUpperCase(), temp.Zflag.toString(16).toUpperCase(), temp.base);
+                _StdOut.advanceLine();
+                _StdOut.putText("PID: " + temp.PID);
+                _StdOut.advanceLine();
+                _StdOut.putText("Turnaround Time: " + temp.turnaround);
+                _StdOut.advanceLine();
+                _StdOut.putText("Wait Time: " + temp.waittime);
+                //advance line and put prompt
+                _StdOut.advanceLine();
+                _OsShell.putPrompt();
+                //reset main mem using base
+                base = temp.base;
+                for (var j = base; j < base + 255; j++) {
+                    _Memory.memArray[j] = "00";
+                }
+            }
+            else if (loc == "ready") {
+                for (var i = 0; i < _ReadyQueue.getSize(); i++) {
+                    temp = _ReadyQueue.dequeue();
+                    if (pid == temp.PID) {
+                        break;
+                    }
+                    else {
+                        _ReadyQueue.enqueue(temp);
+                    }
+                }
+                temp.state = "Terminated";
+                TSOS.Control.updatePCBTable(temp.PID, temp.state, temp.PC, temp.IR, temp.Acc.toString(16).toUpperCase(), temp.Xreg.toString(16).toUpperCase(), temp.Yreg.toString(16).toUpperCase(), temp.Zflag.toString(16).toUpperCase(), temp.base);
+                _StdOut.advanceLine();
+                _StdOut.putText("PID: " + temp.PID);
+                _StdOut.advanceLine();
+                _StdOut.putText("Turnaround Time: " + temp.turnaround);
+                _StdOut.advanceLine();
+                _StdOut.putText("Wait Time: " + temp.waittime);
+                //advance line and put prompt
+                _StdOut.advanceLine();
+                _OsShell.putPrompt();
+                //reset main mem using base
+                base = temp.base;
+                for (var j = base; j < base + 255; j++) {
+                    _Memory.memArray[j] = "00";
+                }
+            }
+        }
+        clearMemory() {
+            for (var i = 0; i < 768; i++) {
+                _Memory.memArray[i] = "00";
+            }
+            var resLen = _ResidentQueue.getSize();
+            var readyLen = _ReadyQueue.getSize();
+            for (var i = 0; i < resLen; i++) {
+                _ResidentQueue.dequeue();
+            }
+            for (var j = 0; j < readyLen; j++) {
+                _ReadyQueue.dequeue();
+            }
+        }
+        contextSwitch() {
+            console.log("in context switch");
+            _currPcb.state = "Ready";
+            TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
+            _ReadyQueue.enqueue(_currPcb);
+            cpuCycles = 0;
+            _Scheduler.getNewProc();
+            console.log("current pcb after get new proc: " + _currPcb.PID);
+            _Scheduler.setCPU();
+        }
         //
         // OS Utility Routines
         //
-        createProcess(pid) {
-            //create a new process
-            var newProc = new TSOS.ProcessControlBlock(pid.toString(), TSOS.MemoryManager.allocate());
-            //add it to the ready queue
-            this.readyQueue.push(newProc);
-            //update the PCB table
-            TSOS.Control.updatePCB();
-            //set the current program to the new process
-            _CPU.program = newProc;
-            //initialize
-            newProc.init();
-        }
         krnTrace(msg) {
             // Check globals to see if trace is set ON.  If so, then (maybe) log the message.
             if (_Trace) {
@@ -174,22 +419,10 @@ var TSOS;
                     TSOS.Control.hostLog(msg, "OS");
                 }
             }
-            //create displayDate and displayTime to get date and time
-            var displayDate = new Date().toLocaleDateString();
-            var displayTime = new Date();
-            //Update time in task bar
-            document.getElementById("time").innerHTML = "Time: " + displayDate + " " + displayTime.getHours()
-                + ":" + displayTime.getMinutes() + ":" + displayTime.getSeconds();
         }
         krnTrapError(msg) {
-            //clear the screen, reset the position, and print text at top
-            _StdOut.clearScreen();
-            _StdOut.resetXY();
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
-            _DrawingContext.fillStyle = 'blue';
-            _DrawingContext.fillRect(0, 0, _Canvas.width, _Canvas.height);
-            _StdOut.putText("OS ERROR - TRAP: " + msg);
             this.krnShutdown();
         }
     }

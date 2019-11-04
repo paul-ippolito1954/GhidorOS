@@ -5,26 +5,26 @@
      Requires global.ts.
      ------------ */
 
-     module TSOS{
+     ///<reference path="../globals.ts" />
 
-        export class Memory {
+module TSOS {
 
-            public memArray: string[];
+    export class Memory {
 
-            public init(){
+        //create a memory array
+        public memArray: string[];
 
-                // create the actual array and values
-                this.memArray = new Array<string>();
-
-                // size is 768, as it is our maximum
-
-                for(var i = 0; i < 768; i++){
-
-                    // load it with initial 00 values
-                    this.memArray[i] = "00";
-                }
-
+        public init(){
+            //create a main memory array
+            this.memArray = new Array<string>();
+            //making it size 768 in anticipation for project 3
+            for (var i = 0; i < 768; i++){
+                //load the array with all 00
+                this.memArray[i] = "00";
             }
+            //console.log("Main mem initializer: " + this.mainMem);
         }
 
-     }
+
+    }
+}

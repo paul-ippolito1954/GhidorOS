@@ -1,20 +1,16 @@
 ///<reference path="../globals.ts" />
-///<reference path="../../source/os/canvastext.ts" />
+///<reference path="../os/canvastext.ts" />
 /* ------------
      Control.ts
-
      Requires globals.ts.
-
      Routines for the hardware simulation, NOT for our client OS itself.
      These are static because we are never going to instantiate them, because they represent the hardware.
      In this manner, it's A LITTLE BIT like a hypervisor, in that the Document environment inside a browser
      is the "bare metal" (so to speak) for which we write code that hosts our client OS.
      But that analogy only goes so far, and the lines are blurred, because we are using TypeScript/JavaScript
      in both the host and client environments.
-
      This (and other host/simulation scripts) is the only place that we should see "web" code, such as
      DOM manipulation and event handling, and so on.  (Index.html is -- obviously -- the only place for markup.)
-
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
@@ -57,6 +53,12 @@ var TSOS;
             // Update the log console.
             var taLog = document.getElementById("taHostLog");
             taLog.value = str + taLog.value;
+            //get datetime for task bar
+            //Create a date variable
+            var dt = new Date().toLocaleString();
+            // console.log(dt);
+            // Set the datetime and status(global) to the taskbar
+            document.getElementById("taskBar").innerHTML = "<p1>" + dt + " ~ " + _Status + "</p1>";
             // TODO in the future: Optionally update a log database or some streaming service.
         }
         //
@@ -78,7 +80,7 @@ var TSOS;
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
-            this.loadTable();
+            this.createMemoryTable();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");
@@ -96,154 +98,72 @@ var TSOS;
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
-        //method to clear the memory table
-        static clearTable() {
-            var tableDiv = document.getElementById("divMemory");
-            //loop down to delete every row
-            for (var i = this.tbl.rows.length - 1; i >= 0; i--)
-                this.tbl.deleteRow(i);
-        }
-        //method to update the memory table
-        static loadTable() {
-            //find table div and set id
-            var tableDiv = document.getElementById("divMemory");
-            this.tbl.setAttribute("id", "tableMemory");
-            //set equal to number that memory column header should be equal to
-            var memNum = 0;
-            //console.log(_Memory.memArray.toString());
-            for (var p = 0; p < 3; p++) {
-                //loop through 32 times to create 32 rows
-                for (var i = 0; i < 32; i++) {
-                    var tr = this.tbl.insertRow();
-                    //create 9 columns in those rows
-                    for (var j = 0; j < 9; j++) {
-                        var td = tr.insertCell();
-                        //if first in column
-                        if (j == 0) {
-                            var hexNum = memNum.toString(16).toUpperCase();
-                            //if single digit, add 0x00 in front
-                            if (hexNum.length == 1)
-                                td.appendChild(document.createTextNode("0x00" + hexNum));
-                            //if two digits, add 0x0 in front
-                            else if (hexNum.length == 2)
-                                td.appendChild(document.createTextNode("0x0" + hexNum));
-                            //if three digits, add 0x in front
-                            else
-                                td.appendChild(document.createTextNode("0x" + hexNum));
-                        }
-                        //if not first in column
-                        else {
-                            //add memory value to cell
-                            td.appendChild(document.createTextNode(_Memory.memArray[p][this.memArrayPosition]));
-                            //increment row count
-                            this.memArrayPosition++;
-                        }
-                    }
-                    //increment column header by 8
-                    memNum += 8;
-                }
-                this.memArrayPosition = 0;
-            }
-            //add to page
-            tableDiv.appendChild(this.tbl);
-            //set height and overflow of memory table
-            document.getElementById("tableMemory").style.height = '100px';
-            document.getElementById("tableMemory").style.overflow = 'auto';
-            //reset counters to 0
-            this.memArrayPosition = 0;
-        }
-        static updatePCB() {
-            this.clearPCB();
-            //find table div and set id
-            var divPCB = document.getElementById("divPCB");
-            this.tblPCB.setAttribute("id", "tablePCB");
-            //loop through for the length of the ready queue to get PCB count
-            for (var i = 0; i <= _Kernel.readyQueue.length; i++) {
-                var tr = this.tblPCB.insertRow();
-                //create 8 columns in those rows
-                for (var j = 0; j < 8; j++) {
-                    var td = tr.insertCell();
-                    if (i == 0) {
-                        //add titles to cell if first row
-                        switch (j) {
-                            case 0:
-                                td.appendChild(document.createTextNode("PID"));
-                                break;
-                            case 1:
-                                td.appendChild(document.createTextNode("Status"));
-                                break;
-                            case 2:
-                                td.appendChild(document.createTextNode("PC"));
-                                break;
-                            case 3:
-                                td.appendChild(document.createTextNode("IR"));
-                                break;
-                            case 4:
-                                td.appendChild(document.createTextNode("Acc"));
-                                break;
-                            case 5:
-                                td.appendChild(document.createTextNode("X"));
-                                break;
-                            case 6:
-                                td.appendChild(document.createTextNode("Y"));
-                                break;
-                            case 7:
-                                td.appendChild(document.createTextNode("ZF"));
-                                break;
-                        }
-                    }
-                    else {
-                        if (_Kernel.readyQueue[i - 1].status != "Terminated") {
-                            //add appropriate values to cell
-                            switch (j) {
-                                case 0:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].processId));
-                                    break;
-                                case 1:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].status));
-                                    break;
-                                case 2:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].position));
-                                    break;
-                                case 3:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].IR));
-                                    break;
-                                case 4:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Acc));
-                                    break;
-                                case 5:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Xreg));
-                                    break;
-                                case 6:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Yreg));
-                                    break;
-                                case 7:
-                                    td.appendChild(document.createTextNode(_Kernel.readyQueue[i - 1].Zflag));
-                                    break;
-                            }
-                        }
-                    }
+        static createMemoryTable() {
+            var row = [];
+            var table = "";
+            var hexVar = 0;
+            for (var i = 0; i < _Memory.memArray.length; i++) {
+                row.push(_Memory.memArray[i]);
+                if (row.length == 8) {
+                    var html = `<tr>` +
+                        `<td>0x${hexVar.toString(16).toUpperCase()}</td>` +
+                        `<td>${row[0]}</td>` +
+                        `<td>${row[1]}</td>` +
+                        `<td>${row[2]}</td>` +
+                        `<td>${row[3]}</td>` +
+                        `<td>${row[4]}</td>` +
+                        `<td>${row[5]}</td>` +
+                        `<td>${row[6]}</td>` +
+                        `<td>${row[7]}</td>` +
+                        `</tr>`;
+                    hexVar += 8;
+                    table += html;
+                    row = [];
                 }
             }
-            //add to page
-            divPCB.appendChild(this.tblPCB);
+            document.getElementById('memTable').innerHTML = table;
         }
-        static clearPCB() {
-            for (var i = this.tblPCB.rows.length - 1; i >= 0; i--)
-                this.tblPCB.deleteRow(i);
+        static updateCPUTable(pc, ir, acc, x, y, z) {
+            document.getElementById("cpu-pc").innerHTML = String(pc);
+            document.getElementById("cpu-ir").innerHTML = String(ir);
+            document.getElementById("cpu-acc").innerHTML = String(acc);
+            document.getElementById("cpu-x").innerHTML = String(x);
+            document.getElementById("cpu-y").innerHTML = String(y);
+            document.getElementById("cpu-z").innerHTML = String(z);
         }
-        static updateCPU(PC, Acc, IR, Xreg, Yreg, Zflag) {
-            document.getElementById("PC").innerHTML = PC;
-            document.getElementById("Acc").innerHTML = Acc;
-            document.getElementById("IR").innerHTML = IR;
-            document.getElementById("Xreg").innerHTML = Xreg;
-            document.getElementById("Yreg").innerHTML = Yreg;
-            document.getElementById("Zflag").innerHTML = Zflag;
+        static updatePCBTable(pid, state, pc, ir, acc, x, y, z, base) {
+            if (base == 0) {
+                document.getElementById("pcb1-pid").innerHTML = String(pid);
+                document.getElementById("pcb1-state").innerHTML = String(state);
+                document.getElementById("pcb1-pc").innerHTML = String(pc);
+                document.getElementById("pcb1-ir").innerHTML = ir;
+                document.getElementById("pcb1-acc").innerHTML = String(acc);
+                document.getElementById("pcb1-x").innerHTML = String(x);
+                document.getElementById("pcb1-y").innerHTML = String(y);
+                document.getElementById("pcb1-z").innerHTML = String(z);
+            }
+            else if (base == 256) {
+                document.getElementById("pcb2-pid").innerHTML = String(pid);
+                document.getElementById("pcb2-state").innerHTML = String(state);
+                document.getElementById("pcb2-pc").innerHTML = String(pc);
+                document.getElementById("pcb2-ir").innerHTML = ir;
+                document.getElementById("pcb2-acc").innerHTML = String(acc);
+                document.getElementById("pcb2-x").innerHTML = String(x);
+                document.getElementById("pcb2-y").innerHTML = String(y);
+                document.getElementById("pcb2-z").innerHTML = String(z);
+            }
+            else {
+                document.getElementById("pcb3-pid").innerHTML = String(pid);
+                document.getElementById("pcb3-state").innerHTML = String(state);
+                document.getElementById("pcb3-pc").innerHTML = String(pc);
+                document.getElementById("pcb3-ir").innerHTML = ir;
+                document.getElementById("pcb3-acc").innerHTML = String(acc);
+                document.getElementById("pcb3-x").innerHTML = String(x);
+                document.getElementById("pcb3-y").innerHTML = String(y);
+                document.getElementById("pcb3-z").innerHTML = String(z);
+            }
         }
     }
-    Control.tbl = document.createElement('table');
-    Control.tblPCB = document.createElement('table');
-    Control.memArrayPosition = 0;
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));
 //# sourceMappingURL=control.js.map

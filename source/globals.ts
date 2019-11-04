@@ -24,7 +24,7 @@ const OUTPUT_IRQ: number = 3;
 
 const COMPLETE_PROC_IRQ: number = 4;
 
-const CONTEXT_SWITCH: number = 5
+const CONTEXT_SWITCH_IRQ: number = 5
 
 const KILL_PROC_IRQ: number = 6;
 
@@ -52,7 +52,7 @@ var _DefaultFontFamily: string = "sans";        // Ignored, I think. The was jus
 var _DefaultFontSize: number = 13;
 var _FontHeightMargin: number = 4;              // Additional space added to font size when advancing a line.
 
-var _Status: string = "Welcome to GhidorOS, Bidibidi"
+var _Status: string = "Bidibidi means hello"
 
 var _Trace: boolean = true;  // Default the OS trace to be on.
 
@@ -108,6 +108,9 @@ var _Interrupt: TSOS.Interrupt;
 //run all
 var runall: boolean = false;
 
+//single step mode
+var singleStepMode: boolean = false;
+var step: boolean = false;
 
 var onDocumentLoad = function() {
 	TSOS.Control.hostInit();

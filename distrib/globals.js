@@ -17,7 +17,7 @@ const KEYBOARD_IRQ = 1;
 const OPCODE_ERROR_IRQ = 2;
 const OUTPUT_IRQ = 3;
 const COMPLETE_PROC_IRQ = 4;
-const CONTEXT_SWITCH = 5;
+const CONTEXT_SWITCH_IRQ = 5;
 const KILL_PROC_IRQ = 6;
 const MEMORY_ACCESS_IRQ = 7;
 //
@@ -35,7 +35,7 @@ var _DrawingContext; // = _Canvas.getContext("2d");  // Assigned here for type s
 var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holder in 2008, but the HTML canvas may have use for it.
 var _DefaultFontSize = 13;
 var _FontHeightMargin = 4; // Additional space added to font size when advancing a line.
-var _Status = "Welcome to GhidorOS, Bidibidi";
+var _Status = "Bidibidi means hello";
 var _Trace = true; // Default the OS trace to be on.
 // The OS Kernel and its queues.
 var _Kernel;

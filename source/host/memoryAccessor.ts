@@ -1,42 +1,55 @@
 ///<reference path="../globals.ts" />
-
-/* ------------
-     MemoryAccessor.ts
-     Requires global.ts.
-     ------------ */
-
 module TSOS {
 
     export class MemoryAccessor {
 
-        public static readMemory(position: number): string {
-            return _Memory.memArray[_CPU.program.segment][position];
-        }
+        //read value from memory
+        public readValue(address: number){
 
-        public static writeMemory(position: number,  val: string): void {
+            //console.log(address);
 
-            val = (+val).toString(16).toUpperCase();
-            if(val.length == 1)
-                _Memory.memArray[_CPU.program.segment][position] = "0" + val;
-            else
-                _Memory.memArray[_CPU.program.segment][position] = val;
-          
-            TSOS.Control.clearTable();
-            TSOS.Control.loadTable();
-        }
+            var base = _currPcb.base;
+            //console.log("base in mem access: " + base);
 
-        public static clearMem(): void {
-            for(var j = 0; j < 3; j++) {
-                for (var i = 0; i < 256; i++) {
-                    _Memory.memArray[j][i] = "00";
-                }
+            //create memory address from base of process
+            var memAddress = Number(base + address);
+
+            //console.log("current pcb and address: " + _currPcb.PID + " : " + memAddress);
+
+            //check to see if memory address created is within the process bounds in memory
+            if (memAddress <= (base + _limit)){
+                //return value at address in memory
+                return _Memory.memArray[memAddress];
+            }else{
+                //console.log("Memory address out of bounds.");
+                var killInfo = [_currPcb.PID, "current"];
+                _KernelInterruptQueue.enqueue(new Interrupt(MEMORY_ACCESS_IRQ, killInfo));
             }
+
+
+
         }
 
-        public static memoryLength(): number{
-            return _Memory.memArray[0].length;
+        //write value to memory
+        public writeValue(address: number, value: number){
+
+            var base = _currPcb.base;
+            //create memory address from base of process
+            var memAddress = base + address;
+
+
+            //check to see if memory address created is within the process bounds in memory
+            if (memAddress <= (base + _limit)){
+                //set value at memory location
+                _Memory.memArray[memAddress] = value.toString(16);
+            }else{
+                //console.log("Memory address out of bounds.");
+                var killInfo = [_currPcb.PID, "current"];
+                _KernelInterruptQueue.enqueue(new Interrupt(MEMORY_ACCESS_IRQ, killInfo));
+            }
+
         }
+
     }
 
 }
-
