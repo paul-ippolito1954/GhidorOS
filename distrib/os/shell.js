@@ -75,7 +75,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - runs program with process id <pid>");
             this.commandList[this.commandList.length] = sc;
             //clearmem
-            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "kills all resident or waiting processes, clears memory");
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "clears memory if nothing is running");
             this.commandList[this.commandList.length] = sc;
             //runall
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "runs all processes loaded");

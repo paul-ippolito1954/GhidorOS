@@ -129,7 +129,7 @@ module TSOS {
             //clearmem
             sc = new ShellCommand(this.shellClearMem,
                 "clearmem",
-                "kills all resident or waiting processes, clears memory");
+                "clears memory if nothing is running");
             this.commandList[this.commandList.length] = sc;
 
             //runall
