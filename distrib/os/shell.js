@@ -391,17 +391,47 @@ var TSOS;
             document.getElementById("status").innerHTML = "Status: " + status + " |";
         }
         shellRun(args) {
-            console.log("PID: " + _OsShell.pids);
-            if (_OsShell.pids == args) {
+            _CPU.scheduling = false;
+            var validPID = false;
+            //if the arg matches a process id that's in the ready queue and it hasn't been run yet, set to valid
+            for (var i = 0; i < _Kernel.readyQueue.length; i++) {
+                console.log("Stat " + _Kernel.readyQueue[i].processId + ": " + _Kernel.readyQueue[i].status);
+                if (_Kernel.readyQueue[i].processId == args && _Kernel.readyQueue[i].status == "Ready")
+                    validPID = true;
+            }
+            //if valid
+            if (validPID) {
+                //set running pid to args
                 _CPU.runningPID = args;
-                _CPU.isExecuting = true;
+                //set program equal to the one we're running
+                _CPU.program = _Kernel.readyQueue[args];
+                //add to running queue
+                _Kernel.runningQueue.push(_CPU.program);
+                //reset CPU
+                _CPU.position = 0;
+                _CPU.Acc = "0";
+                _CPU.IR = "0";
+                _CPU.Xreg = "0";
+                _CPU.Yreg = "0";
+                _CPU.Zflag = "0";
+                _CPU.isExecuting = false;
+                TSOS.Control.updateCPU(String(_CPU.position), _CPU.Acc, _CPU.IR, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
             }
             else {
-                _StdOut.putText("Invalid Process ID");
+                _StdOut.putText("Not a valid PID");
             }
         }
         shellClearMem() {
-            _StdOut.putText("Will clear memory eventually");
+            //mark all as free
+            _Memory.section0Free = true;
+            _Memory.section1Free = true;
+            _Memory.section2Free = true;
+            //clear memory
+            TSOS.MemoryAccessor.clearMem();
+            _StdOut.putText("Cleared mem");
+            //clear table and reload it
+            TSOS.Control.clearTable();
+            TSOS.Control.loadTable();
         }
         shellRunAll() {
             _StdOut.putText("I'm gonna run EVERYTHING");

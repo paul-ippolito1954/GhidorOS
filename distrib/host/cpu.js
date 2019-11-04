@@ -26,7 +26,6 @@ var TSOS;
             this.Zflag = Zflag;
             this.isExecuting = isExecuting;
             this.runningPID = 0;
-            this.singleStep = false;
             this.quantum = 6;
             this.scheduling = true;
         }
