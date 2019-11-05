@@ -694,19 +694,28 @@ module TSOS {
         /**
          * Since it needs to kill all the processes,
          * this just loops through all the queues
-         * and passes the PIDs it finds into shellKill
+         * and passes the PIDs it finds into shellKill.
+         * vari i must be cast to String so args actually 
+         * accepts it. Was getting undefined pid with passing it
+         * as int :( 
+         * 
+         * 
          */
         public shellKillAll(){
             _StdOut.putText("CHITTY CHITTY BANG");
             _StdOut.advanceLine();
             _StdOut.putText("MURDER EVERYTHING");
 
-            for(var i; i < _ResidentQueue.getSize(); i++){
-                this.shellKill(i);
+            for(var i = 0; i < _ResidentQueue.getSize(); i ++){
+                var temp = _ResidentQueue.q[i];
+                _StdOut.advanceLine();
+                _OsShell.shellKill(String(temp.PID));
             }
 
-            for(var j; j < _ReadyQueue.getSize(); i++){
-                this.shellKill(i);
+            for(var i = 0; i < _ReadyQueue.getSize(); i ++){
+                var temp = _ReadyQueue.q[i];
+                _StdOut.advanceLine();
+                _OsShell.shellKill(String(temp.PID));
             }
 
         }
