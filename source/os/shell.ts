@@ -691,10 +691,23 @@ module TSOS {
 
         }
 
+        /**
+         * Since it needs to kill all the processes,
+         * this just loops through all the queues
+         * and passes the PIDs it finds into shellKill
+         */
         public shellKillAll(){
             _StdOut.putText("CHITTY CHITTY BANG");
             _StdOut.advanceLine();
             _StdOut.putText("MURDER EVERYTHING");
+
+            for(var i; i < _ResidentQueue.getSize(); i++){
+                this.shellKill(i);
+            }
+
+            for(var j; j < _ReadyQueue.getSize(); i++){
+                this.shellKill(i);
+            }
 
         }
 

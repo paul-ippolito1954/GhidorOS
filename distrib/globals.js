@@ -75,6 +75,7 @@ var _currPcb;
 var _Interrupt;
 //run all
 var runall = false;
+var killall = false;
 //single step mode
 var singleStepMode = false;
 var step = false;

@@ -108,6 +108,8 @@ var _Interrupt: TSOS.Interrupt;
 //run all
 var runall: boolean = false;
 
+var killall: boolean = false;
+
 //single step mode
 var singleStepMode: boolean = false;
 var step: boolean = false;

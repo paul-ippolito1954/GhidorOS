@@ -85,22 +85,10 @@ var TSOS;
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
                 //console.log("In kernel in cycle curr pcb pid: " + _currPcb.PID)
-                if (singleStepMode == true) {
-                    if (step == true) {
-                        _CPU.cycle();
-                        if (runall == true) {
-                            _Scheduler.schedule();
-                            _Scheduler.updateWaitAndTurnaround();
-                        }
-                        step = false;
-                    }
-                }
-                else {
-                    _CPU.cycle();
-                    if (runall == true) {
-                        _Scheduler.schedule();
-                        _Scheduler.updateWaitAndTurnaround();
-                    }
+                _CPU.cycle();
+                if (runall == true) {
+                    _Scheduler.schedule();
+                    _Scheduler.updateWaitAndTurnaround();
                 }
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
