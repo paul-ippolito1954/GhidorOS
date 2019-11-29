@@ -168,6 +168,12 @@ module TSOS {
                 "<filename> - creates file of specified name");
             this.commandList[this.commandList.length] = sc;
 
+            //read
+            sc = new ShellCommand(this.shellRead,
+                "read",
+                "<filename> - displays contents of specified file");
+            this.commandList[this.commandList.length] = sc;
+
 
             //
             // Display the initial prompt.
@@ -743,9 +749,22 @@ module TSOS {
             }
         }
 
+        /**
+         * creates files with user given name
+         * @param args 
+         */
         public shellCreate(args){
             var fileName = args;
             _StdOut.putText("Successfully created file " +fileName);
         }
+
+        /**
+         * reads/displays content of file if it exists
+         * @param args 
+         */
+        public shellRead(args){
+            _StdOut.putText("I can't read yet");
+        }
+
     }
 }
