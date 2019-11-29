@@ -147,10 +147,24 @@ td {
 
 }
 
+#diskDisplay{
+  border: 3px solid orchid;
+  border-radius: 4px;
+  background-color: white;
+  overflow: auto;;
+  text-align: center;
+  width: 500px;
+  height: 300px;
+  margin: auto;
+}
+
 .tableId{
   border-bottom: 3px solid crimson;
 }
 
+.diskTableId{
+  border-bottom: 3px solid orchid;
+}
 .table{
 
 }
