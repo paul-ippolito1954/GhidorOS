@@ -162,6 +162,12 @@ module TSOS {
                 "<int> - sets Round Robin Quantum to new int");
             this.commandList[this.commandList.length] = sc;
 
+            //create
+            sc = new ShellCommand(this.shellCreate,
+                "create",
+                "<filename> - creates file of specified name");
+            this.commandList[this.commandList.length] = sc;
+
 
             //
             // Display the initial prompt.
@@ -735,6 +741,11 @@ module TSOS {
             else{
                 _StdOut.putText("Quantum must be greater than 0.");
             }
+        }
+
+        public shellCreate(args){
+            var fileName = args;
+            _StdOut.putText("Successfully created file " +fileName);
         }
     }
 }
