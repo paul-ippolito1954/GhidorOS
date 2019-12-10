@@ -55,6 +55,7 @@ module TSOS {
 
         public createFile(fileName): string{
             var hexName = this.convertToAscii(fileName);
+            return;
         }
 
         /**

@@ -73,6 +73,7 @@ var _limit = 255;
 //current process
 var _currPcb;
 var _Interrupt;
+var _Swapper;
 //run all
 var runall = false;
 var killall = false;

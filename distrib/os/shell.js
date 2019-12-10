@@ -412,7 +412,7 @@ var TSOS;
                     else {
                         _StdOut.putText("Program loaded into memory with Process ID " + _Pid);
                         //call kernel to create a new process
-                        _Kernel.createProcess(base);
+                        _Kernel.createProcess(base, priority);
                     }
                 }
             }

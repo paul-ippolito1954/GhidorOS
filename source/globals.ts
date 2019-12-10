@@ -105,6 +105,8 @@ var _currPcb: TSOS.ProcessControlBlock;
 
 var _Interrupt: TSOS.Interrupt;
 
+var _Swapper: TSOS.Swapper;
+
 //run all
 var runall: boolean = false;
 
