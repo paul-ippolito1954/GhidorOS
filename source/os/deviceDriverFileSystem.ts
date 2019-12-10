@@ -51,6 +51,47 @@ module TSOS {
             }
             else
               console.log("Your Browser does not support session storage");
+        }
+
+        public createFile(fileName): string{
+            var hexName = this.convertToAscii(fileName);
+        }
+
+        /**
+         * converts given string to Ascii
+         * @param data 
+         */
+        public convertToAscii(data){
+
+            // create an empty array for the new hex values for each letter
+            var hexArr = [];
+
+            // loop through string and convert each letter to ascii hex
+            // and push to array
+            for (var i = 0; i < data.length; i++){
+                hexArr[hexArr.length] = data.charCodeAt(i).toString(16);
+            }
+
+            return hexArr;
+        }
+
+        /**
+         * converts hex to ascii to string
+         * @param hexArr 
+         */
+        public convertToString(hexArr){
+
+            // create empty string and variable for char
+            var char;
+            var str = "";
+
+            // loop through hex array and convert each character to a letter and add to string
+            for (var i = 0; i < hexArr.length; i++){
+                char = String.fromCharCode(parseInt(hexArr[i], 16));
+                str += char;
+            }
+
+            return str;
 
         }
     }
