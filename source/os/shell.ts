@@ -801,9 +801,21 @@ module TSOS {
             _StdOut.putText("I can't read yet");
         }
 
-
+        /**
+         * writes whatever data user gives to specified
+         * file if it exists
+         * @param args 
+         */
         public shellWrite(args){
             _StdOut.putText("LOL I can't write yet");
+        }
+        
+        /**
+         * deeltes file if it exists
+         * @param args 
+         */
+        public shellDelete(args){
+            _StdOut.putText("Cannot delete");
         }
 
     }

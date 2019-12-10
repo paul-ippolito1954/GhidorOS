@@ -633,8 +633,20 @@ var TSOS;
         shellRead(args) {
             _StdOut.putText("I can't read yet");
         }
+        /**
+         * writes whatever data user gives to specified
+         * file if it exists
+         * @param args
+         */
         shellWrite(args) {
             _StdOut.putText("LOL I can't write yet");
+        }
+        /**
+         * deeltes file if it exists
+         * @param args
+         */
+        shellDelete(args) {
+            _StdOut.putText("Cannot delete");
         }
     }
     TSOS.Shell = Shell;
