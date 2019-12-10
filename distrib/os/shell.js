@@ -688,7 +688,12 @@ var TSOS;
          * displays the current scheduling algorithm
          */
         shellGetSchedule() {
-            _StdOut.putText("Current schedule is nothing");
+            if (_schedule == "fcfs")
+                _StdOut.putText("Scheduling is First Come First Serve");
+            else if (_schedule == "rr")
+                _StdOut.putText("Scheduling is Round Robin");
+            else if (_schedule == "priority")
+                _StdOut.putText("Scheduling is Priority");
         }
     }
     TSOS.Shell = Shell;
