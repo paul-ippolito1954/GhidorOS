@@ -826,5 +826,12 @@ module TSOS {
             _StdOut.putText("Format, yes");
         }
 
+        /**
+         * lists all files, except hidden ones
+         */
+        public shellLs(){
+            _StdOut.putText("lisitng files");
+        }
+
     }
 }

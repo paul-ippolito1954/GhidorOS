@@ -655,6 +655,12 @@ var TSOS;
         shellFormat() {
             _StdOut.putText("Format, yes");
         }
+        /**
+         * lists all files, except hidden ones
+         */
+        shellLs() {
+            _StdOut.putText("lisitng files");
+        }
     }
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
