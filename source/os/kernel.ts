@@ -37,6 +37,12 @@
                 _krnKeyboardDriver = new DeviceDriverKeyboard();     // Construct it.
                 _krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
                 this.krnTrace(_krnKeyboardDriver.status);
+
+                //Load the File System
+                this.krnTrace("Loading the file system device driver.");
+                _krnFileSystem = new DeviceDriverFileSystem();
+                _krnFileSystem.driverEntry();
+                this.krnTrace(_krnFileSystem.status);
     
                 //
                 // ... more?
