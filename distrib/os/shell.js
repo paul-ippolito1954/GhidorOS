@@ -667,7 +667,22 @@ var TSOS;
          * @param args
          */
         shellSetSchedule(args) {
-            _StdOut.putText("Setting schedule to nothing");
+            var algo = args[0];
+            if (algo == "rr") {
+                _schedule = algo;
+                _StdOut.putText("Round Robin Scheduling Selected");
+            }
+            else if (algo == "fcfs") {
+                _schedule = algo;
+                _StdOut.putText("FCFS scheduling selected");
+            }
+            else if (algo == "priority") {
+                _schedule = algo;
+                _StdOut.putText("Priority scheduling selected");
+            }
+            else {
+                _StdOut.putText("setschedule <string>: can be rr, fcfs, or priority. Supply a string");
+            }
         }
         /**
          * displays the current scheduling algorithm

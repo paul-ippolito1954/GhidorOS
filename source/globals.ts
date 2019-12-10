@@ -110,9 +110,8 @@ var runall: boolean = false;
 
 var killall: boolean = false;
 
-//single step mode
-var singleStepMode: boolean = false;
-var step: boolean = false;
+// initialize schedule to Round Robin
+var _schedule: string = "rr";
 
 var onDocumentLoad = function() {
 	TSOS.Control.hostInit();

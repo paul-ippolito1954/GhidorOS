@@ -76,9 +76,8 @@ var _Interrupt;
 //run all
 var runall = false;
 var killall = false;
-//single step mode
-var singleStepMode = false;
-var step = false;
+// initialize schedule to Round Robin
+var _schedule = "rr";
 var onDocumentLoad = function () {
     TSOS.Control.hostInit();
 };
