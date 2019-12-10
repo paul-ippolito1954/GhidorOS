@@ -1,14 +1,5 @@
 /* TSOS.css */
 
-#logo{
-  width: 100%;
-  height: 100px;
-  background-color: white;
-}
-
-
-
-
 
 .normal_button{
 
@@ -27,9 +18,6 @@
   margin-right: auto;
   width: 50%;
 }
-
-
-
 
 body {
   background: #909193 url(distrib/images/GhidorahScales.png) repeat;
@@ -62,7 +50,7 @@ h3 {
 }
 
 #display {
-  background-color: lightsalmon;
+  background-color: peru;
   border: 4px solid white;
   cursor: default;
   font-family: "Comic Sans MS";
@@ -85,14 +73,14 @@ h3 {
 }
 
 .footerText {
-  color: deepskyblue;
+  color: black;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 10pt;
+  font-size: 8pt;
   text-align: center;
 }
 
 #taskBar {
-  border: 4px solid rgb(224, 151, 16);
+  border: 4px solid blue;
   border-radius: 10px;
   display: inline-block;
   text-align: center;
@@ -111,44 +99,42 @@ p1{
 }
 
 td {
-
   text-align: center;
-
 }
 
 #cpuDisplay{
-  border: 3px solid crimson;
+  border: 3px solid red;
   border-radius: 4px;
   background-color: white;
-  width: 400px;
+  width: 600px;
   text-align: center;
 
 }
 
 #pcbDisplay{
   margin-top: 50px;
-  border: 3px solid crimson;
+  border: 3px solid red;
   border-radius: 4px;
   background-color: white;
-  width: 400px;
+  width: 600px;
   text-align: center;
 
 }
 
 #memDisplay{
   margin-top: 50px;
-  border: 3px solid crimson;
+  border: 3px solid red;
   border-radius: 4px;
   height: 300px;
   overflow: auto;
   background-color: white;
-  width: 400px;
+  width: 600px;
   text-align: center;
 
 }
 
 #diskDisplay{
-  border: 3px solid orchid;
+  border: 3px solid purple;
   border-radius: 4px;
   background-color: white;
   overflow: auto;;
@@ -159,12 +145,13 @@ td {
 }
 
 .tableId{
-  border-bottom: 3px solid crimson;
+  border-bottom: 3px solid red;
 }
 
 .diskTableId{
-  border-bottom: 3px solid orchid;
+  border-bottom: 3px solid purple;
 }
+
 .table{
 
 }

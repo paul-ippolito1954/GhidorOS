@@ -500,11 +500,18 @@ module TSOS {
          * Reads in the code from the UserProgramInput
          * validates if hex. If valid hex, allocate to a free memory partition
          * and update memory to reflect that. If not valid hex or memory is full,
-         * inform the user of either respectively.
+         * inform the user of either respectively. Priority of program is passed as
+         * additional argument, optional
          */
-        public shellLoad(){
+        public shellLoad(args){
 
-               //store the user input in a variable
+            if (args.length > 0){
+                var priority = args[0];
+            }else{
+                priority = 0;
+            }
+
+            //store the user input in a variable
             var programInput = (<HTMLInputElement>document.getElementById("taProgramInput")).value;
             //console.log(programInput);
 
@@ -534,9 +541,10 @@ module TSOS {
                     var base = _MemoryManager.loadMem(_userProgram);
                     console.log("Base on load: " + base);
                     if (base == -1){
-                        _StdOut.putText("No space in memory left.");
+                        //call kernel to create a new process
+                        _Kernel.loadProcessToDisk(_Pid, _userProgram, priority);
                     }else{
-                        _StdOut.putText("Program loaded into memory with Process ID " + _Pid);
+                        _StdOut.putText("Program loaded into memory with Process ID: " + _Pid + " - with Priority: " + priority);
                         //call kernel to create a new process
                         _Kernel.createProcess(base, priority);
                     }
@@ -544,6 +552,7 @@ module TSOS {
                 }
 
             }
+
 
         }
 

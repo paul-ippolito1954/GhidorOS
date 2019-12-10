@@ -128,10 +128,9 @@ var TSOS;
                 case ("00"):
                     //break
                     //set executing to false and call kernel exit process
-                    console.log(this.IR, " ", _currPcb.IR);
-                    console.log("Current pcb pid in 00 ", _currPcb.PID);
+                    //console.log(this.IR, " ", _currPcb.IR);
+                    //console.log("Current pcb pid in 00 ", _currPcb.PID);
                     TSOS.Control.updateCPUTable(this.PC, this.IR, this.Acc.toString(16), this.Xreg.toString(16), this.Yreg.toString(16), this.Zflag.toString(16));
-                    TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16), _currPcb.Xreg.toString(16), _currPcb.Yreg.toString(16), _currPcb.Zflag.toString(16), _currPcb.base);
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(COMPLETE_PROC_IRQ, _currPcb.PID));
                     break;
                 case ("EC"):
@@ -216,7 +215,7 @@ var TSOS;
             }
             cpuCycles += 1;
             _currPcb.turnaround += 1;
-            console.log("Clock cycles: " + cpuCycles);
+            //console.log("Clock cycles: " + cpuCycles);
             //update all variables and display tables
             _currPcb.PC = this.PC;
             _currPcb.Acc = this.Acc;
@@ -225,7 +224,6 @@ var TSOS;
             _currPcb.Yreg = this.Yreg;
             _currPcb.Zflag = this.Zflag;
             TSOS.Control.updateCPUTable(this.PC, this.IR, this.Acc.toString(16).toUpperCase(), this.Xreg.toString(16).toUpperCase(), this.Yreg.toString(16).toUpperCase(), this.Zflag.toString(16).toUpperCase());
-            TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
         }
     }
     TSOS.Cpu = Cpu;

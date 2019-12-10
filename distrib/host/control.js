@@ -200,6 +200,28 @@ var TSOS;
             }
             document.getElementById('pcbTable').innerHTML = table;
         }
+        static loadDiskTable() {
+            var table = "";
+            for (var i = 0; i < sessionStorage.length; i++) {
+                var tsb = sessionStorage.key(i);
+                var value = JSON.parse(sessionStorage.getItem(tsb));
+                var tsbString = tsb[0] + ":" + tsb[1] + ":" + tsb[2];
+                var availableBit = value[0];
+                var pointer = value[1] + ":" + value[2] + ":" + value[3];
+                var data = [];
+                for (var a = 4; a < value.length; a++) {
+                    data[a - 4] = value[a];
+                }
+                var html = `<tr>` +
+                    `<td>${tsbString}</td>` +
+                    `<td>${availableBit}</td>` +
+                    `<td>${pointer}</td>` +
+                    `<td>${data.join("")}</td>` +
+                    `</tr>`;
+                table += html;
+            }
+            document.getElementById('diskTable').innerHTML = table;
+        }
     }
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));

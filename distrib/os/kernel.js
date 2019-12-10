@@ -95,6 +95,8 @@ var TSOS;
                 this.krnTrace("Idle");
             }
             TSOS.Control.createMemoryTable();
+            TSOS.Control.updatePCBTable();
+            TSOS.Control.loadDiskTable();
         }
         //
         // Interrupt Handling
@@ -245,7 +247,7 @@ var TSOS;
             var base = _currPcb.base;
             //console.log("In exit: " + _currPcb.base);
             for (var j = base; j < base + 255; j++) {
-                _Memory.mainMem[j] = "00";
+                _Memory.memArray[j] = "00";
             }
             if (_ReadyQueue.isEmpty()) {
                 _CPU.isExecuting = false;
@@ -298,7 +300,6 @@ var TSOS;
                 for (var j = base; j < base + 255; j++) {
                     _Memory.memArray[j] = "00";
                 }
-                TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
                 if (_ReadyQueue.getSize() > 0) {
                     _currPcb = _ReadyQueue.dequeue();
                     _CPU.PC = _currPcb.PC;
@@ -332,7 +333,6 @@ var TSOS;
                     }
                 }
                 temp.state = "Terminated";
-                TSOS.Control.updatePCBTable(temp.PID, temp.state, temp.PC, temp.IR, temp.Acc.toString(16).toUpperCase(), temp.Xreg.toString(16).toUpperCase(), temp.Yreg.toString(16).toUpperCase(), temp.Zflag.toString(16).toUpperCase(), temp.base);
                 _StdOut.advanceLine();
                 _StdOut.putText("PID: " + temp.PID);
                 _StdOut.advanceLine();
@@ -342,10 +342,23 @@ var TSOS;
                 //advance line and put prompt
                 _StdOut.advanceLine();
                 _OsShell.putPrompt();
-                //reset main mem using base
+                //reset main mem or disk using base
                 base = temp.base;
-                for (var j = base; j < base + 255; j++) {
-                    _Memory.memArray[j] = "00";
+                if (base == -1) {
+                    //get filename based on pid
+                    var filename = "process:" + temp.PID;
+                    //gets program and clears lines along the way
+                    var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
+                    //clear the filename line
+                    var tsb = _krnFileSystem.getTsb(filename);
+                    var block = JSON.parse(sessionStorage.getItem(tsb));
+                    block = _krnFileSystem.clearLine(tsb);
+                    sessionStorage.setItem(tsb, JSON.stringify(block));
+                }
+                else {
+                    for (var j = base; j < base + 255; j++) {
+                        _Memory.memArray[j] = "00";
+                    }
                 }
             }
             else if (loc == "ready") {
@@ -359,7 +372,6 @@ var TSOS;
                     }
                 }
                 temp.state = "Terminated";
-                TSOS.Control.updatePCBTable(temp.PID, temp.state, temp.PC, temp.IR, temp.Acc.toString(16).toUpperCase(), temp.Xreg.toString(16).toUpperCase(), temp.Yreg.toString(16).toUpperCase(), temp.Zflag.toString(16).toUpperCase(), temp.base);
                 _StdOut.advanceLine();
                 _StdOut.putText("PID: " + temp.PID);
                 _StdOut.advanceLine();
@@ -369,10 +381,23 @@ var TSOS;
                 //advance line and put prompt
                 _StdOut.advanceLine();
                 _OsShell.putPrompt();
-                //reset main mem using base
+                //reset main mem or disk using base
                 base = temp.base;
-                for (var j = base; j < base + 255; j++) {
-                    _Memory.memArray[j] = "00";
+                if (base == -1) {
+                    //get filename based on pid
+                    var filename = "process:" + temp.PID;
+                    //gets program and clears lines along the way
+                    var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
+                    //clear the filename line
+                    var tsb = _krnFileSystem.getTsb(filename);
+                    var block = JSON.parse(sessionStorage.getItem(tsb));
+                    block = _krnFileSystem.clearLine(tsb);
+                    sessionStorage.setItem(tsb, JSON.stringify(block));
+                }
+                else {
+                    for (var j = base; j < base + 255; j++) {
+                        _Memory.memArray[j] = "00";
+                    }
                 }
             }
         }
@@ -390,14 +415,35 @@ var TSOS;
             }
         }
         contextSwitch() {
-            console.log("in context switch");
-            _currPcb.state = "Ready";
-            TSOS.Control.updatePCBTable(_currPcb.PID, _currPcb.state, _currPcb.PC, _currPcb.IR, _currPcb.Acc.toString(16).toUpperCase(), _currPcb.Xreg.toString(16).toUpperCase(), _currPcb.Yreg.toString(16).toUpperCase(), _currPcb.Zflag.toString(16).toUpperCase(), _currPcb.base);
-            _ReadyQueue.enqueue(_currPcb);
-            cpuCycles = 0;
-            _Scheduler.getNewProc();
-            console.log("current pcb after getting new proc: " + _currPcb.PID);
-            _Scheduler.setCPU();
+            if (_ReadyQueue.getSize() > 0) {
+                _currPcb.state = "Ready";
+                var temPcb = _currPcb;
+                cpuCycles = 0;
+                _Scheduler.getNewProc();
+                if (_currPcb.base == -1) {
+                    //SWAP IT OUT
+                    //Call swapProcess with temp base
+                    _Swapper.swapProcesses(temPcb.PID, temPcb.base);
+                    _currPcb.base = temPcb.base;
+                    _currPcb.location = "Memory";
+                    temPcb.base = -1;
+                    temPcb.location = "Disk";
+                }
+                _ReadyQueue.enqueue(temPcb);
+                _Scheduler.setCPU();
+            }
+        }
+        loadProcessToDisk(pid, userProgram, priority) {
+            //call load process to disk from file system driver
+            var outcome = _krnFileSystem.loadProcessToDisk(pid, userProgram);
+            //if its successfull create a new process
+            if (outcome == "SUCCESS") {
+                _Kernel.createProcess(-1, priority);
+                _StdOut.putText("Program loaded onto disk with Process ID: " + pid + " - with Priority: " + priority);
+            }
+            else {
+                _StdOut.putText(outcome);
+            }
         }
         //
         // OS Utility Routines
