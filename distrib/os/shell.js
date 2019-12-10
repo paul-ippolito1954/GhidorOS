@@ -669,6 +669,12 @@ var TSOS;
         shellSetSchedule(args) {
             _StdOut.putText("Setting schedule to nothing");
         }
+        /**
+         * displays the current scheduling algorithm
+         */
+        shellGetSchedule() {
+            _StdOut.putText("Current schedule is nothing");
+        }
     }
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
