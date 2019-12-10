@@ -818,5 +818,13 @@ module TSOS {
             _StdOut.putText("Cannot delete");
         }
 
+        /**
+         * formats the file system.
+         * Initializes all blocks in all sectors and tracks
+         */
+        public shellFormat(){
+            _StdOut.putText("Format, yes");
+        }
+
     }
 }

@@ -648,6 +648,13 @@ var TSOS;
         shellDelete(args) {
             _StdOut.putText("Cannot delete");
         }
+        /**
+         * formats the file system.
+         * Initializes all blocks in all sectors and tracks
+         */
+        shellFormat() {
+            _StdOut.putText("Format, yes");
+        }
     }
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
