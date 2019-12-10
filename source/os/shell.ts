@@ -174,6 +174,41 @@ module TSOS {
                 "<filename> - displays contents of specified file");
             this.commandList[this.commandList.length] = sc;
 
+            // write
+            sc = new ShellCommand(this.shellWrite,
+                "write",
+                "<filename> 'data - writes file the data in quotes ");
+            this.commandList[this.commandList.length] = sc;
+
+            // delete
+            sc = new ShellCommand(this.shellDelete,
+                "delete",
+                "<filename> - deletes given file");
+            this.commandList[this.commandList.length] = sc;
+
+            // format
+            sc = new ShellCommand(this.shellFormat,
+                "format",
+                "formats file system");
+            this.commandList[this.commandList.length] = sc;
+
+            //ls
+            sc = new ShellCommand(this.shellLs,
+                "ls",
+                "lists files stored on disk");
+            this.commandList[this.commandList.length] = sc;
+
+            //setschedule
+            sc = new ShellCommand(this.shellSetSchedule,
+                "setschedule",
+                "[rr, fcfs, priority] - selects CPU scheduling algorithm");
+            this.commandList[this.commandList.length] = sc;
+
+            //getschedule
+            sc = new ShellCommand(this.shellGetSchedule,
+                "getschedule",
+                "displays current scheduling algorithm");
+            this.commandList[this.commandList.length] = sc;
 
             //
             // Display the initial prompt.
@@ -764,6 +799,11 @@ module TSOS {
          */
         public shellRead(args){
             _StdOut.putText("I can't read yet");
+        }
+
+
+        public shellWrite(args){
+            _StdOut.putText("LOL I can't write yet");
         }
 
     }

@@ -98,6 +98,24 @@ var TSOS;
             //read
             sc = new TSOS.ShellCommand(this.shellRead, "read", "<filename> - displays contents of specified file");
             this.commandList[this.commandList.length] = sc;
+            // write
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "<filename> 'data - writes file the data in quotes ");
+            this.commandList[this.commandList.length] = sc;
+            // delete
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "<filename> - deletes given file");
+            this.commandList[this.commandList.length] = sc;
+            // format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "formats file system");
+            this.commandList[this.commandList.length] = sc;
+            //ls
+            sc = new TSOS.ShellCommand(this.shellLs, "ls", "lists files stored on disk");
+            this.commandList[this.commandList.length] = sc;
+            //setschedule
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "[rr, fcfs, priority] - selects CPU scheduling algorithm");
+            this.commandList[this.commandList.length] = sc;
+            //getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "displays current scheduling algorithm");
+            this.commandList[this.commandList.length] = sc;
             //
             // Display the initial prompt.
             this.putPrompt();
@@ -614,6 +632,9 @@ var TSOS;
          */
         shellRead(args) {
             _StdOut.putText("I can't read yet");
+        }
+        shellWrite(args) {
+            _StdOut.putText("LOL I can't write yet");
         }
     }
     TSOS.Shell = Shell;
