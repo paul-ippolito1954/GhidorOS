@@ -833,5 +833,14 @@ module TSOS {
             _StdOut.putText("lisitng files");
         }
 
+
+        /**
+         * sets scheduling algorithm to either round robin,
+         * fcfs, or priority based on user's input
+         * @param args 
+         */
+        public shellSetSchedule(args){
+            _StdOut.putText("Setting schedule to nothing");
+        }
     }
 }

@@ -661,6 +661,14 @@ var TSOS;
         shellLs() {
             _StdOut.putText("lisitng files");
         }
+        /**
+         * sets scheduling algorithm to either round robin,
+         * fcfs, or priority based on user's input
+         * @param args
+         */
+        shellSetSchedule(args) {
+            _StdOut.putText("Setting schedule to nothing");
+        }
     }
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
