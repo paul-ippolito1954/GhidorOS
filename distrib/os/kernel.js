@@ -450,6 +450,19 @@ var TSOS;
                 _StdOut.putText(outcome);
             }
         }
+        /**
+         * Beyond here are the File modification methods
+         * All these do is call the device driver's methods
+         * and log the message to console and shell
+         */
+        /**
+         * Create file
+         * @param filename
+         */
+        createFile(filename) {
+            var msg = _krnFileSystem.createFile(filename);
+            _StdOut.putText(msg);
+        }
         //
         // OS Utility Routines
         //
