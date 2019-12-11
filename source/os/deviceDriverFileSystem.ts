@@ -7,8 +7,8 @@ module TSOS {
         
         public track: number;
         public sector: number;
-        public block: number;
-        public blockSize: number;
+        public block:number;
+        public blockSize:number;
 
         constructor(){
             super();
@@ -23,77 +23,42 @@ module TSOS {
         /**
          * initializes sessionstorage if the browser user is on supports the HTML5 storage
          */
-        public krnFileSysDriverEntry(){
-
-            //Inititalization for kernel mode keyboard device driver
+        public krnFileSysDriverEntry() {
+            // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
+            // More?
 
-            if(sessionStorage){
+            if (sessionStorage){
                 var tsb: string;
 
                 var lineValue = [];
 
-                // set bits for available and pointer
+                //set single bits for available bit and pointer
                 for (var i = 0; i < 4; i++){
-                    lineValue.push["00"];
+                    lineValue.push("0")
                 }
 
-                // create tsb for every track sector block and store in sessionstorage
-                // with lineValue
-                for(var i = 0; i < this.track; i++){
-                    for(var j = 0; j < this.sector; j++){
-                        for(var k = 0; k < this.block; k++){
+                //set base line values to 00
+                for (var i = 0; i < this.blockSize; i++){
+                    lineValue.push("00");
+                }
+
+                //create tsb for each track sector block and store in session storage with linevalue
+                sessionStorage.clear();
+                for (var i = 0; i < this.track; i++){
+                    for (var j = 0; j < this.sector; j++){
+                        for (var k = 0; k < this.block; k++){
                             tsb = i.toString() + j.toString() + k.toString();
                             sessionStorage.setItem(tsb, JSON.stringify(lineValue));
                         }
                     }
                 }
-            }
-            else
-              console.log("Your Browser does not support session storage");
-        }
+            }else{
 
-        public createFile(fileName): string{
-            var hexName = this.convertToAscii(fileName);
-            return;
-        }
-
-        /**
-         * converts given string to Ascii
-         * @param data 
-         */
-        public convertToAscii(data){
-
-            // create an empty array for the new hex values for each letter
-            var hexArr = [];
-
-            // loop through string and convert each letter to ascii hex
-            // and push to array
-            for (var i = 0; i < data.length; i++){
-                hexArr[hexArr.length] = data.charCodeAt(i).toString(16);
+                console.log("Sorry your browser does not support Session Storage.");
             }
 
-            return hexArr;
         }
 
-        /**
-         * converts hex to ascii to string
-         * @param hexArr 
-         */
-        public convertToString(hexArr){
-
-            // create empty string and variable for char
-            var char;
-            var str = "";
-
-            // loop through hex array and convert each character to a letter and add to string
-            for (var i = 0; i < hexArr.length; i++){
-                char = String.fromCharCode(parseInt(hexArr[i], 16));
-                str += char;
-            }
-
-            return str;
-
-        }
     }
 }
