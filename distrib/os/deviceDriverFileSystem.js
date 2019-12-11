@@ -415,8 +415,44 @@ var TSOS;
             //if none are available, return null
             return null;
         }
-        //list all files in directory
+        /**
+         * Lists files based on type
+         * list is public if user did not use ls -l
+         * no hidden files will show.
+         * all files will show if they use ls -l
+         * @param listType
+         */
         listFiles(listType) {
+            var track = "0";
+            var filenames = [];
+            // loop through first dir (0) and skip MBR
+            for (var i = 0; i < this.sector; i++) {
+                for (var j = 1; j < this.block; j++) {
+                    var tsb = track + i.toString() + j.toString();
+                    var currBlock = JSON.parse(sessionStorage.getItem(tsb));
+                    if (currBlock[0] == "1") {
+                        var hexName = [];
+                        var index = 4;
+                        var filename = "";
+                        while (currBlock[index] != "00") {
+                            hexName[index - 4] = currBlock[index];
+                            index++;
+                        }
+                        filename = this.convertToString(hexName);
+                        if (listType == "all") {
+                            // add all filenames if ls -l was chosen at shell
+                            filenames[filenames.length] = filename;
+                        }
+                        else if (listType == "public") {
+                            if (filename[0] != ".") {
+                                // if list type is public, only add it if the first character is not a .
+                                filenames[filenames.length] = filename;
+                            }
+                        }
+                    }
+                }
+            }
+            return filenames;
         }
         //load a process to the disk
         loadProcessToDisk(pid, userProg) {
@@ -465,7 +501,10 @@ var TSOS;
                 return "Disk is full. Program could not be loaded.";
             }
         }
-        //retrieve a process from the disk
+        /**
+         * Retrieves process stored on the disk
+         * @param filename
+         */
         getProcessFromDisk(filename) {
             var hexName = this.convertToAscii(filename);
             var program = [];

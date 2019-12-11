@@ -488,6 +488,17 @@ var TSOS;
             var msg = _krnFileSystem.readFile(filename);
             _StdOut.putText(msg);
         }
+        /**
+         * List files
+         * @param listType
+         */
+        listFiles(listType) {
+            var filenames = _krnFileSystem.listFiles(listType);
+            for (var i = 0; i < filenames.length; i++) {
+                _StdOut.putText(filenames[i]);
+                _StdOut.advanceLine();
+            }
+        }
         //
         // OS Utility Routines
         //

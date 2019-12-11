@@ -591,6 +591,20 @@
                  _StdOut.putText(msg);
              }
 
+             /**
+              * List files
+              * @param listType 
+              */
+             public listFiles(listType: string){
+                var filenames = _krnFileSystem.listFiles(listType);
+
+                for (var i = 0; i < filenames.length; i++){
+                    _StdOut.putText(filenames[i]);
+                    _StdOut.advanceLine();
+                }
+
+             }
+
 
              
             //

@@ -820,7 +820,7 @@ module TSOS {
          * @param args 
          */
         public shellRead(args){
-            
+
             if (args.length > 0){
                 var filename = args[0];
                 _Kernel.readFile(filename);
@@ -893,8 +893,23 @@ module TSOS {
         /**
          * lists all files, except hidden ones
          */
-        public shellLs(){
-            _StdOut.putText("lisitng files");
+        public shellLs(args){
+            
+            if (args.length > 0){
+
+                if (args[0] == "-l"){
+
+                    //call showall files
+                    _Kernel.listFiles("all");
+                }
+                else{
+                    _StdOut.putText("Usage: ls -l for showing all files (including hidden ones)");
+                }
+            }
+            else{
+                //list only public files
+                _Kernel.listFiles("public");
+            }
         }
 
 

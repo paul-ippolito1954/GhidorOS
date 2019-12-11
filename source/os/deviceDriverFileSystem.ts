@@ -530,8 +530,51 @@ module TSOS {
             return null;
         }
 
-        //list all files in directory
+        /**
+         * Lists files based on type
+         * list is public if user did not use ls -l
+         * no hidden files will show.
+         * all files will show if they use ls -l
+         * @param listType 
+         */
         public listFiles(listType: string){
+
+            var track = "0";
+            var filenames = [];
+
+            // loop through first dir (0) and skip MBR
+            for (var i = 0; i < this.sector; i++){
+                for (var j = 1; j < this.block; j++){
+                    var tsb = track + i.toString() + j.toString();
+                    var currBlock = JSON.parse(sessionStorage.getItem(tsb));
+
+                    if (currBlock[0] == "1"){
+
+                        var hexName = [];
+                        var index = 4;
+                        var filename = "";
+
+                        while (currBlock[index] != "00"){
+                            hexName[index - 4] = currBlock[index];
+                            index++;
+                        }
+
+                        filename = this.convertToString(hexName);
+                        if (listType == "all"){
+                            // add all filenames if ls -l was chosen at shell
+                            filenames[filenames.length] = filename;
+                        }else if (listType == "public"){
+                            if (filename[0] != "."){
+                                // if list type is public, only add it if the first character is not a .
+                                filenames[filenames.length] = filename;
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            return filenames;
             
         }
 
@@ -595,7 +638,10 @@ module TSOS {
 
         }
 
-        //retrieve a process from the disk
+        /**
+         * Retrieves process stored on the disk
+         * @param filename 
+         */
         public getProcessFromDisk(filename){
 
             var hexName = this.convertToAscii(filename)
@@ -625,7 +671,8 @@ module TSOS {
                     pointer = this.clearLine(pointerTsb);
                     sessionStorage.setItem(pointerTsb, JSON.stringify(pointer));
                     return program;
-                }else{
+                }
+                else{
                     while (newPointerTsb != "000"){
 
                         //check what pointer bits are
@@ -656,7 +703,6 @@ module TSOS {
             }else{
                 return "File name does not exist.";
             }
-
         }
 
         //write a process to the disk
@@ -721,13 +767,9 @@ module TSOS {
                             }else{
                                 currBlock[k+4] = proc[k + offset];
                             }
-
                         }
                         sessionStorage.setItem(tsb, JSON.stringify(currBlock));
                     }
-
-
-
                 }
 
             }else{
@@ -738,9 +780,6 @@ module TSOS {
 
                 sessionStorage.setItem(tsb, JSON.stringify(currBlock));
             }
-
-
         }
-
     }
 }
