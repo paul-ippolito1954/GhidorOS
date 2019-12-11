@@ -631,8 +631,18 @@ var TSOS;
          * @param args
          */
         shellCreate(args) {
-            var fileName = args;
-            _StdOut.putText("Successfully created file " + fileName);
+            if (args.length > 0) {
+                var filename = args[0];
+                if (filename.length <= _krnFileSystem.blockSize) {
+                    _Kernel.createFile(filename);
+                }
+                else {
+                    _StdOut.putText("File name too long - must be 60 characters or less.");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: create <filename> Please supply a filename.");
+            }
         }
         /**
          * reads/displays content of file if it exists
