@@ -316,6 +316,61 @@ module TSOS {
          */
         public readFile(filename){
 
+            var hexName = this.convertToAscii(filename)
+            var hexArr = []
+            var str = "";
+
+            //check if filename exists
+            if (this.fileNameExists(hexName)){
+                //get the tsb of the file and data at that block
+                var tsb = this.getTsb(filename);
+                var currBlock = JSON.parse(sessionStorage.getItem(tsb));
+                //find the pointer of the filename block
+                var pointerTsb = currBlock[1] + currBlock[2] + currBlock[3];
+                var pointer = JSON.parse(sessionStorage.getItem(pointerTsb));
+                //get the pointer's pointer
+                var newPointerTsb = pointer[1] + pointer[2] + pointer[3];
+
+
+                if (newPointerTsb == "000"){
+                    //grab the data from the pointer and convert hexstring to regular string
+                    for (var i = 4; i < pointer.length; i++){
+                        if (pointer[i] != "00"){
+                            hexArr[i-4] = pointer[i];
+                        }
+                    }
+                    str = this.convertToString(hexArr);
+                    return str;
+                }else{
+                    while (newPointerTsb != "000"){
+
+                        //check what pointer bits are
+                        newPointerTsb = pointer[1] + pointer[2] + pointer[3];
+
+                        //add pointer data to hexstr
+                        for (var j = 4; j < pointer.length; j++){
+                            if (pointer[j] != "00"){
+                                hexArr.push(pointer[j]);
+                            }
+                        }
+
+                        //go to new pointer
+                        var newPointer = JSON.parse(sessionStorage.getItem(newPointerTsb));
+
+                        //set to current pointer
+                        pointer = newPointer;
+                        pointerTsb = newPointerTsb;
+                    }
+
+                    str = this.convertToString(hexArr);
+                    return str;
+                }
+
+            }
+            else{
+                return "File name does not exist.";
+            }
+
         }
 
         /**

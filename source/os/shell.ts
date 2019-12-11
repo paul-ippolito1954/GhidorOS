@@ -820,7 +820,13 @@ module TSOS {
          * @param args 
          */
         public shellRead(args){
-            _StdOut.putText("I can't read yet");
+            
+            if (args.length > 0){
+                var filename = args[0];
+                _Kernel.readFile(filename);
+            }else{
+                _StdOut.putText("Usage: read <filename>  Please supply a filename.")
+            }
         }
 
         /**

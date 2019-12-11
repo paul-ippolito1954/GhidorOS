@@ -472,8 +472,20 @@ var TSOS;
             var message = _krnFileSystem.writeFile(filename, data);
             _StdOut.putText(message);
         }
+        /**
+         * deletes file
+         * @param filename
+         */
         deleteFile(filename) {
             var msg = _krnFileSystem.deleteFile(filename);
+            _StdOut.putText(msg);
+        }
+        /**
+         * reads content of file
+         * @param filename
+         */
+        readFile(filename) {
+            var msg = _krnFileSystem.readFile(filename);
             _StdOut.putText(msg);
         }
         //

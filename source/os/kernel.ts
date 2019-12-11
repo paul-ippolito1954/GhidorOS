@@ -573,8 +573,21 @@
                 _StdOut.putText(message);
              }
 
+             /**
+              * deletes file
+              * @param filename 
+              */
              public deleteFile(filename: string){
                  var msg = _krnFileSystem.deleteFile(filename);
+                 _StdOut.putText(msg);
+             }
+
+             /**
+              * reads content of file
+              * @param filename 
+              */
+             public readFile(filename: string){
+                 var msg = _krnFileSystem.readFile(filename);
                  _StdOut.putText(msg);
              }
 
