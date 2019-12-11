@@ -829,7 +829,7 @@ module TSOS {
          * @param args 
          */
         public shellWrite(args){
-            
+
             if (args.length > 1){
 
                 // set filename to args[0] and str to args[1] to start
@@ -867,7 +867,13 @@ module TSOS {
          * @param args 
          */
         public shellDelete(args){
-            _StdOut.putText("Cannot delete");
+            if (args.length > 0){
+                var filename = args[0];
+                _Kernel.deleteFile(filename);
+            }
+            else{
+                _StdOut.putText("Usage: delete <filename>  Please supply a filename.")
+            }
         }
 
         /**

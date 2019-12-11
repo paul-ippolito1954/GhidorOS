@@ -686,7 +686,13 @@ var TSOS;
          * @param args
          */
         shellDelete(args) {
-            _StdOut.putText("Cannot delete");
+            if (args.length > 0) {
+                var filename = args[0];
+                _Kernel.deleteFile(filename);
+            }
+            else {
+                _StdOut.putText("Usage: delete <filename>  Please supply a filename.");
+            }
         }
         /**
          * formats the file system.

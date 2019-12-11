@@ -57,7 +57,10 @@ module TSOS {
         }
 
 
-        //create a new file
+        /**
+         * Create new file and store it
+         * @param filename 
+         */
         public createFile(filename): string{
 
             var hexName = this.convertToAscii(filename);
@@ -120,7 +123,12 @@ module TSOS {
             }
         }
 
-        //write data to a file
+        /**
+         * Writes data to a file if it exists
+         * and data is given
+         * @param filename 
+         * @param str 
+         */
         public writeFile(filename, str){
 
             var hexName = this.convertToAscii(filename);
@@ -206,7 +214,10 @@ module TSOS {
 
         }
 
-        //clear data on line
+        /**
+         * Clear the data on a line
+         * @param tsb 
+         */
         public clearData(tsb){
 
             var lineValue = [];
@@ -250,7 +261,10 @@ module TSOS {
 
 
 
-        //get tsb from a filename
+        /**
+         * Retrieves the TSB of a given filename
+         * @param filename 
+         */
         public getTsb(filename): string{
 
             var hexName = this.convertToAscii(filename);
@@ -296,13 +310,56 @@ module TSOS {
             }
         }
 
-        //read data in a file
+        /**
+         * read data from a file
+         * @param filename 
+         */
         public readFile(filename){
 
         }
 
-        //delete a file
+        /**
+         * Delete file if it exists
+         * @param filename 
+         */
         public deleteFile(filename){
+
+            var hexName = this.convertToAscii(filename);
+            var currBlock;
+            var pointer;
+            var pointerTsb;
+
+            if (this.fileNameExists(hexName)){
+
+                //get current block and pointer tsb of that block
+                var tsb = this.getTsb(filename);
+                currBlock = JSON.parse(sessionStorage.getItem(tsb));
+                pointerTsb = currBlock[1] + currBlock[2] + currBlock[3];
+
+
+                //while there are still pointer files left
+                while(pointerTsb != "000"){
+
+                    pointerTsb = currBlock[1] + currBlock[2] + currBlock[3];
+
+                    //clear the currentLine and write to session storage
+                    currBlock = this.clearLine(tsb);
+                    sessionStorage.setItem(tsb, JSON.stringify(currBlock));
+
+                    //get pointer from pointer tsb
+                    pointer = JSON.parse(sessionStorage.getItem(pointerTsb));
+
+                    currBlock = pointer;
+                    tsb = pointerTsb;
+
+                }
+
+                return ("Successfully deleted file: " + filename);
+
+            }
+            else{
+                return "File name does not exist.";
+            }
 
         }
 
