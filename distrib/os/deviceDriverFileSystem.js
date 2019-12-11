@@ -103,6 +103,70 @@ var TSOS;
          * @param str
          */
         writeFile(filename, str) {
+            var hexName = this.convertToAscii(filename);
+            //check if filename exists
+            if (this.fileNameExists(hexName)) {
+                //get tsb from the given filename
+                var currTsb = this.getTsb(filename);
+                //get current block from that tsb
+                var currBlock = JSON.parse(sessionStorage.getItem(currTsb));
+                //find pointerlocation of that tsb
+                var pointerTsb = currBlock[1] + currBlock[2] + currBlock[3];
+                //clear current data at the pointer
+                var pointer = JSON.parse(sessionStorage.getItem(pointerTsb));
+                pointer = this.clearData(pointerTsb);
+                //convert the given string to a hexstring
+                var hexStr = this.convertToAscii(str);
+                if (str.length > 60) {
+                    //continue this loop until string is no longer 60 characters
+                    while (str.length > 60) {
+                        //separate the string into the first 60 bits and the rest
+                        var firstPart = str.substring(0, 60);
+                        firstPart = this.convertToAscii(firstPart);
+                        var str = str.substring(61);
+                        //get a new pointer file to assign to the current pointer file for rest of string
+                        var newPointerTsb = this.getPointer();
+                        if (newPointerTsb == null) {
+                            return "Out of space on disk to continue writing file.";
+                        }
+                        var newPointer = JSON.parse(sessionStorage.getItem(newPointerTsb));
+                        //change available bit of new pointer to 1
+                        newPointer[0] = "1";
+                        sessionStorage.setItem(newPointerTsb, JSON.stringify(newPointer));
+                        //update original pointer bits with new pointer tsb
+                        for (var i = 1; i < 4; i++) {
+                            pointer[i] = newPointerTsb[i - 1];
+                        }
+                        //update pointer file with firstpart
+                        for (var j = 0; j < firstPart.length; j++) {
+                            pointer[j + 4] = firstPart[j];
+                        }
+                        //write the first 60 characters to the pointer file in sessionstorage
+                        sessionStorage.setItem(pointerTsb, JSON.stringify(pointer));
+                        pointer = newPointer;
+                        pointerTsb = newPointerTsb;
+                        if (str.length < 60) {
+                            str = this.convertToAscii(str);
+                            for (var k = 0; k < str.length; k++) {
+                                pointer[k + 4] = str[k];
+                            }
+                            sessionStorage.setItem(pointerTsb, JSON.stringify(pointer));
+                        }
+                    }
+                }
+                else {
+                    //set the hex value of the string in the pointer block
+                    for (var a = 0; a < hexStr.length; a++) {
+                        pointer[a + 4] = hexStr[a];
+                    }
+                    sessionStorage.setItem(pointerTsb, JSON.stringify(pointer));
+                    console.log(hexStr + " - original: " + str + " - wrote to " + pointerTsb);
+                }
+                return ("Successfull wrote to file: " + filename);
+            }
+            else {
+                return ("Filename does not exist");
+            }
         }
         /**
          * Clear the data on the line

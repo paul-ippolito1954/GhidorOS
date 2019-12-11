@@ -1,12 +1,21 @@
 ///<reference path="../globals.ts" />
 ///<reference path="deviceDriver.ts" />
+///<reference path="console.ts" />
 /* ----------------------------------
    DeviceDriverKeyboard.ts
+
    Requires deviceDriver.ts
+
    The Kernel Keyboard Device Driver.
    ---------------------------------- */
 var TSOS;
 (function (TSOS) {
+    //parallel arrays "mapping" character codes to their correct characters
+    var charCodes = [192, 191, 188, 190, 186, 222, 219, 221, 220, 187, 189]; //38,    40,     37,     39];
+    var charChars = ["`", "/", ",", ".", ";", "'", "[", "]", "\\", "=", "-"]; //"up", "down", "left", "right" ];
+    //parallel arrays "mapping" character codes to their correct characters when shifted
+    var shiftedCodes = [192, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 187, 219, 221, 220, 186, 222, 191, 188, 190];
+    var shiftedChars = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "?", "<", ">"];
     // Extends DeviceDriver
     class DeviceDriverKeyboard extends TSOS.DeviceDriver {
         constructor() {
@@ -41,76 +50,44 @@ var TSOS;
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
+                //if the keycode can be found in the shiftedCodes array or the charCodes array...
+            }
+            else if (shiftedCodes.indexOf(keyCode) != -1 || charCodes.indexOf(keyCode) != -1) {
+                //if the keycode is in charCodes array and shift is not pressed...
+                if (charCodes.indexOf(keyCode) != -1 && !isShifted) {
+                    //...write the character at the corresponding index in charChars
+                    var index = charCodes.indexOf(keyCode);
+                    _KernelInputQueue.enqueue(charChars[index]);
+                    //if the keycode can be found in the shiftedCodes array and the shift key is pressed...
+                }
+                else if (shiftedCodes.indexOf(keyCode) != -1 && isShifted) {
+                    //...write the character at the corresponding index in shiftedChars
+                    var index = shiftedCodes.indexOf(keyCode);
+                    _KernelInputQueue.enqueue(shiftedChars[index]);
+                }
+                else {
+                    //...print out the actual character(this is only numbers really)
+                    chr = String.fromCharCode(keyCode);
+                    _KernelInputQueue.enqueue(chr);
+                }
             }
             else if (((keyCode >= 48) && (keyCode <= 57)) || // digits
                 (keyCode == 32) || // space
-                (keyCode == 13) || // enter
-                (keyCode == 8) || //backspace
-                (keyCode == 9) || //tab
-                (keyCode == 38) || //up arrow
-                (keyCode == 40) || //down arrow
-                ((keyCode >= 187) && (keyCode <= 191))) { //minus, equals, comma, period, question mark
-                //if a digit or special character and shifted
-                if ((((keyCode >= 48) && (keyCode <= 57) || ((keyCode >= 187) && (keyCode <= 191))) && isShifted))
-                    chr = this.getCharacter(keyCode);
-                else
-                    chr = String.fromCharCode(keyCode);
+                (keyCode == 13)) { //enter
+                chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }
-        }
-        getCharacter(keyCode) {
-            //return the special characters for the key codes
-            switch (keyCode) {
-                case 48:
-                    return ")";
-                    break;
-                case 49:
-                    return "!";
-                    break;
-                case 50:
-                    return "@";
-                    break;
-                case 51:
-                    return "#";
-                    break;
-                case 52:
-                    return "$";
-                    break;
-                case 53:
-                    return "%";
-                    break;
-                case 54:
-                    return "^";
-                    break;
-                //print directly to console if & because otherwise arrow up command happens
-                case 55:
-                    _StdOut.putText("&");
-                    break;
-                case 56:
-                    return "*";
-                    break;
-                //print directly to console if ( because otherwise nothing happens
-                case 57:
-                    _StdOut.putText("(");
-                    break;
-                case 58:
-                    return ")";
-                    break;
-                case 187:
-                    return "+";
-                    break;
-                case 188:
-                    return "<";
-                    break;
-                case 189:
-                    return "_";
-                    break;
-                case 190:
-                    return ">";
-                    break;
-                case 191:
-                    return "?";
-                    break;
+            else if (keyCode == 8) {
+                _StdOut.backSpace();
+            }
+            else if (keyCode == 9) {
+                _StdOut.tab();
+            }
+            else if (keyCode == 38) {
+                _StdOut.cmdRecallUp();
+            }
+            else if (keyCode == 40) {
+                _StdOut.cmdRecallDown();
             }
         }
     }

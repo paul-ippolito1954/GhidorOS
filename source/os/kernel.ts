@@ -563,6 +563,17 @@
                  _StdOut.putText(msg);
              }
 
+             /**
+              * Calls writeFile in disk device driver
+              * @param filename 
+              * @param data 
+              */
+             public writeFile(filename: string, data: string){
+                 var msg = _krnFileSystem.writeFile(filename, data);
+                 _StdOut.putText(msg);
+             }
+
+
              
             //
             // OS Utility Routines

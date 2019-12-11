@@ -2,216 +2,293 @@
 
 /* ------------
      Console.ts
-
      Requires globals.ts
-
      The OS Console - stdIn and stdOut by default.
      Note: This is not the Shell. The Shell is the "command line interface" (CLI) or interpreter for this console.
      ------------ */
 
-module TSOS {
+     module TSOS {
 
-    export class Console {
-
-        constructor(public currentFont = _DefaultFontFamily,
-                    public currentFontSize = _DefaultFontSize,
-                    public currentXPosition = 0,
-                    public currentYPosition = _DefaultFontSize,
-                    public buffer = "",
-                    public arrowValue = -1,
-                    public tabs = 0,
-                    public storeInput = [],
-                    public storeCmd = [],
-                    public storeText = "") {
-        }
-
-        public init(): void {
-            this.clearScreen();
-            this.resetXY();
-        }
-
-        public clearScreen(): void {
-            _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
-        }
-
-        public clearLine(): void {
-            _DrawingContext.clearRect(0, this.currentYPosition - (_DefaultFontSize +
-                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize)), _Canvas.width, _Canvas.height);
-            this.currentXPosition = 0;
-        }
-
-        public resetXY(): void {
-            this.currentXPosition = 0;
-            this.currentYPosition = this.currentFontSize;
-        }
-
-        public handleInput(): void {
-            while (_KernelInputQueue.getSize() > 0) {
-                // Get the next character from the kernel input queue.
-                var chr = _KernelInputQueue.dequeue();
-                // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
-                if (chr === String.fromCharCode(13)) { //     Enter key
-
-                    // check for arrow nav
-                    if(this.arrowValue > -1){
-                        this.buffer += this.storeInput[this.arrowValue];
-                        this.arrowValue = -1;
-                    }
-                    // The enter key marks the end of a console command, so ...
-                    // ... tell the shell ...
-                    _OsShell.handleInput(this.buffer);
-                    // add to storeInput for arrow navigation
-                    this.storeInput.unshift(this.buffer);
-                    // ... and reset our buffer.
-                    this.buffer = "";
-                } else if (chr == String.fromCharCode(8)){ //backspace
-                    this.backspace();
-                } else if (chr == String.fromCharCode(9)){ //tab
-                    this.complete(this.buffer);
-                    this.tabs++;
-                } else if (chr == String.fromCharCode(38)){
-                    //if there are input values left in array, allow to keep going
-                    if(this.arrowValue < this.storeInput.length - 1) {
-                        //increase position in array, clear the line, and print out the input value
-                        this.arrowValue++;
-                        this.clearLine();
-                        _StdOut.putText(_OsShell.promptStr);
-                        _StdOut.putText(this.storeInput[this.arrowValue]);
-                    }
-                } else if (chr === String.fromCharCode(40)) { //down arrow
-                    //don't allow to navigate past 0 in array
-                    if(this.arrowValue > 0) {
-                        //decrease position in array, clear the line, and print out the input value
-                        this.arrowValue--;
-                        this.clearLine();
-                        _StdOut.putText(_OsShell.promptStr);
-                        _StdOut.putText(this.storeInput[this.arrowValue]);
-                    }
-                //handle unshifted special characters
-                } else if (chr === String.fromCharCode(187)){
-                    _StdOut.putText("=");
-                } else if (chr === String.fromCharCode(188)){
-                    _StdOut.putText(",");
-                } else if (chr === String.fromCharCode(189)){
-                    _StdOut.putText("-");
-                } else if (chr === String.fromCharCode(190)){
-                    _StdOut.putText(".");
-                } else if (chr === String.fromCharCode(191)){
-                    _StdOut.putText("/");
-                } 
-                else {
-                    // This is a "normal" character, so ...
-                    // ... draw it on the screen...
-                    this.putText(chr);
-                    // ... and add it to our buffer.
-                    this.buffer += chr;
-                }
-                // TODO: Write a case for Ctrl-C.
+        // command list and length for command recall
+        var _Commands = [];
+        var cmdListLoc = 0;
+    
+        export class Console {
+    
+            constructor(public currentFont = _DefaultFontFamily,
+                        public currentFontSize = _DefaultFontSize,
+                        public currentXPosition = 0,
+                        public currentYPosition = _DefaultFontSize,
+                        public buffer = "") {
             }
-        }
-
-        public putText(text): void {
-            // My first inclination here was to write two functions: putChar() and putString().
-            // Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
-            // between the two.  So rather than be like PHP and write two (or more) functions that
-            // do the same thing, thereby encouraging confusion and decreasing readability, I
-            // decided to write one function and use the term "text" to connote string or char.
-            //
-            // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
-            //         Consider fixing that.
-            if (text !== "") {
-                this.storeText = text;
-                //array to store lines that will be moved
-                var storeLines = [];
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                // if text would leave canvas
-                if(offset + this.currentXPosition > _Canvas.width - 20){
-
-                    //loop through all the text
-                    for(var i = 0; i < text.length; i++){
-
-                        // convert the offset into the spliced text
-                        var spliceOffset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text.slice(0, i));
-                        
-                        // put both the sliced and pre sliced text to the array and reset X position
-                        if (this.currentXPosition + spliceOffset > _Canvas.width - 20) {
-                            storeLines.push(text.slice(0, i - 1));
-                            text = text.slice(i - 1);
-                            storeLines.push(text);
-                            this.currentXPosition = 0;
-                        }
-                    }
-                    //print array lines with line break
-                    for (var i = 0; i < storeLines.length - 1; i++) {
-                        this.putText(storeLines[i]);
-                        this.advanceLine();
-                    }
-                }
-
-                //draw rest of text
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                this.currentXPosition = this.currentXPosition + offset;
-
-            }
-         }
-
-        public advanceLine(): void {
-            this.currentXPosition = 0;
-            /*
-             * Font size measures from the baseline to the highest point in the font.
-             * Font descent measures from the baseline to the lowest point in the font.
-             * Font height margin is extra spacing between the lines.
-             */
-
-             // Varaibale to find line height
-            var lineHeight = _DefaultFontSize + 
-                                     _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
-                                     _FontHeightMargin;
-            
-            // move canvas down by height of line
-            this.currentYPosition += lineHeight;
-
-            // if the text will go past the canvas
-            if (this.currentYPosition >= _Canvas.height) {
-                //copy the currently displayed text 
-                var getDisplayedText = _DrawingContext.getImageData(0, 0, _Canvas.width, _Canvas.height);
+    
+            public init(): void {
                 this.clearScreen();
-
-                //move the y position up one so the text fits, excluding top line
-                this.currentYPosition -= lineHeight;
-
-                //redraw the canvas with the displayed text
-                _DrawingContext.putImageData(getDisplayedText, 0, -lineHeight);
+                this.resetXY();
             }
-            
-        }
-
-        public backspace(): void {
-            this.buffer = this.buffer.substring(0, this.buffer.length - 1);
-            this.clearLine();
-            _StdOut.putText( _OsShell.promptStr + this.buffer);
-            this.arrowValue = -1;
-        }
-
-        public complete(input): void {
-
-            //loop through all commands
-            for(var i = 0; i < _OsShell.commandList.length; i++ ){
-                //compare input to commandlist
-                if(_OsShell.commandList[i].command.includes(input)){
-                    //if input matches, push to array
-                    this.storeCmd.push(_OsShell.commandList[i].command);
+    
+            public clearScreen(): void {
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+            }
+    
+            public resetXY(): void {
+                this.currentXPosition = 0;
+                this.currentYPosition = this.currentFontSize;
+            }
+    
+    
+            private clearLine(): void {
+                ///console.log("Line Height: " + _DefaultFontSize +
+                   // _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                    //_FontHeightMargin);
+                //set the prompt string to a variable
+                var prompt = _OsShell.promptStr;
+                //get the length of the prompt string
+                var promptLen = _DrawingContext.measureText(this.currentFont, this.currentFontSize, prompt);
+                //console.log("Prompt len: " + promptLen);
+                //clear everything on the current line after the prompt string
+                //console.log("Font size: " + _DefaultFontSize);
+                //console.log("Margin: " + _FontHeightMargin);
+                _DrawingContext.clearRect(promptLen, //start after the prompt
+                                          this.currentYPosition - (_DefaultFontSize +
+                                            _DrawingContext.fontDescent(this.currentFont, this.currentFontSize)), //start at the y position above the line (not including margins)
+                                          _Canvas.width, //width of the canvas
+                                         (_DefaultFontSize +
+                                         _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                                         _FontHeightMargin)); //height of the line
+                //set the x position to just after the prompt string
+                this.currentXPosition = promptLen;
+            }
+    
+            private backSpace(): void {
+                //get the length of the buffer
+                var len = this.buffer.length;
+                //make a substring of the buffer (one less character) and set it to newValue
+                var newValue = (this.buffer).substring(0, len - 1);
+                //clear the line
+                this.clearLine();
+                //set the buffer to the new value
+                this.buffer = newValue;
+                //write the new value to the line
+                this.putText(this.buffer);
+            }
+    
+    
+    
+            public handleInput(): void {
+                while (_KernelInputQueue.getSize() > 0) {
+                    // Get the next character from the kernel input queue.
+                    var chr = _KernelInputQueue.dequeue();
+                    // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
+                    if (chr === String.fromCharCode(13)) { //     Enter key
+                        // The enter key marks the end of a console command, so ...
+                        // ... tell the shell ...
+    
+                        //add the input to the commands array
+                        _Commands[_Commands.length] = (this.buffer);
+                        //add one to the cmdListLoc variable since a command was added
+                        //set the cmdListLoc to the length of the commands array to use as an index variable
+                        cmdListLoc = _Commands.length;
+                        //console.log(cmdListLoc);
+    
+                        _OsShell.handleInput(this.buffer);
+                        // ... and reset our buffer.
+                        this.buffer = "";
+                    } else {
+                        // This is a "normal" character, so ...
+                        // ... draw it on the screen...
+                        this.putText(chr);
+                        // ... and add it to our buffer.
+                        this.buffer += chr;
+                    }
+                    // TODO: Write a case for Ctrl-C.
                 }
             }
-            //clear line and print text
-            this.clearLine();
-            _StdOut.putText(_OsShell.promptStr + this.storeCmd[this.tabs]);
-            //add it to buffer
-            this.buffer = this.storeCmd[this.tabs];
-            //loop back if reached end
-            if(this.tabs >= this.storeCmd.length){
-                this.tabs = 0;
+    
+            public putText(text): void {
+                // My first inclination here was to write two functions: putChar() and putString().
+                // Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
+                // between the two.  So rather than be like PHP and write two (or more) functions that
+                // do the same thing, thereby encouraging confusion and decreasing readability, I
+                // decided to write one function and use the term "text" to connote string or char.
+                //
+                // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
+                //         Consider fixing that.
+                if (text !== "") {
+    
+                    //make an array of the words on the line, found by spaces as a separator
+                    var words = text.split(" ");
+                    //console.log("Words: " + words);
+                    //create a current line variable
+                    var currLine = '';
+    
+                    //Linewrap
+                    //Used html5canvastutorials documentation for this part as a resource.
+    
+                    //if its just one word, then don't bother with the second half of the code
+                    if (words.length <= 1){
+                        //if the character is off the canvas
+                        if (this.currentXPosition > _Canvas.width){
+                            //move it to the next line
+                            this.advanceLine();
+                            // Draw the text at the current X and Y coordinates.
+                            _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
+                            // Move the current X position.
+                            var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                            this.currentXPosition = this.currentXPosition + offset;
+                        }else{
+                            // Draw the text at the current X and Y coordinates.
+                            _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
+                            // Move the current X position.
+                            var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                            this.currentXPosition = this.currentXPosition + offset;
+                        }
+    
+                    }else{
+                        //for each word in the words array
+                        for (let word of words){
+                            //make a variable of the current line + the word + a space
+                            var test = currLine + word + " ";
+                            //find the size of the line
+                            var lineSize = _DrawingContext.measureText(this.currentFont, this.currentFontSize, test);
+                            //if that new line's width is longer than the canvas width
+                            if (lineSize > _Canvas.width){
+                                //draw the current line (without the addition of the word and the space)
+                                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, currLine);
+                                //move the current x position
+                                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, " ");
+                                this.currentXPosition = this.currentXPosition + offset;
+                                //set current line equal to the word + a space
+                                currLine = word + " ";
+                                //advance to the next line
+                                this.advanceLine();
+                            }else{
+                                //otherwise, set current line equal to the current line + the word + a space
+                                currLine = test;
+                            }
+                        }
+                        //draw the current line
+                        _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, currLine);
+                        //move the current x position
+                        var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, currLine);
+                        this.currentXPosition = this.currentXPosition + offset;
+                    }
+    
+                }
+    
+             }
+    
+            public advanceLine(): void {
+                this.currentXPosition = 0;
+                /*
+                 * Font size measures from the baseline to the highest point in the font.
+                 * Font descent measures from the baseline to the lowest point in the font.
+                 * Font height margin is extra spacing between the lines.
+                 */
+    
+                var y = this.currentYPosition;
+    
+                this.currentYPosition += _DefaultFontSize + 
+                                         _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                                         _FontHeightMargin;
+    
+                var lineHeight = _DefaultFontSize +
+                                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                                _FontHeightMargin;
+    
+    
+                //scrolling
+                //if the lines go below the canvas height
+                if (this.currentYPosition > _Canvas.height){
+    
+                    //get the image data(text) from the y position at the bottom of the first line to the current y position
+                    var data = _DrawingContext.getImageData(0, lineHeight, _Canvas.width, this.currentYPosition);
+                    //clear the screen
+                    this.clearScreen();
+                    //put the image data on the canvas starting at the coordinate (0,0)
+                    _DrawingContext.putImageData(data, 0, 0);
+                    //reset y so that it's not below the canvas when the line advances
+                    this.currentYPosition = y;
+                }
+    
             }
+    
+            //command completion when pressing tab
+            private tab(): void{
+                var cmdList = _OsShell.commandList;
+                var buf = this.buffer;
+                var bufLen = buf.length;
+                //console.log("Length: " + buf.length);
+                var matchList = [];
+                //console.log(matchList.length);
+                //for each index in cmdlist
+                for (let i in cmdList) {
+                    //get a command at that index
+                    var cmd = cmdList[i].command;
+                    //if the buffer matches a command
+                    if (cmd.substring(0, bufLen) == buf) {
+                        //...add the item to matchList
+                        matchList[matchList.length] = cmd;
+                        //...otherwise...
+                    } else {
+                        //..do nothing really.
+                        console.log("No match");
+                    }
+                }
+    
+                console.log(matchList);
+                    //if just one match is found...
+                    if (matchList.length == 1){
+                        //...clear the line and print it out
+                        this.buffer = matchList[0];
+                        this.clearLine();
+                        this.putText(this.buffer);
+                    }else{
+                        ///otherwise don't do anything because a longer buffer is required
+                        console.log("too many or no matches");
+                    }
+            }
+    
+            //up key to scroll up through commandlist
+            private cmdRecallUp(): void{
+                //console.log(cmdListLoc);
+                //console.log(_Commands);
+    
+                //if the index is 0
+                if (cmdListLoc == 0){
+                    //set the buffer to the command at index 0
+                    this.buffer = _Commands[cmdListLoc];
+                }else{
+                    //otherwise, decrement the index by 1 and set the command at that index to the buffer
+                    cmdListLoc -= 1;
+                    this.buffer = _Commands[cmdListLoc];
+                }
+    
+                //clear the line and write the buffer to the line
+                this.clearLine();
+                this.putText(this.buffer);
+            }
+    
+            //down key to scroll down through commandlist
+            private cmdRecallDown(): void{
+                //console.log(cmdListLoc);
+    
+                //if the index is greater than or equal to the length - 1 (last element) of the commands list...
+                if (cmdListLoc >= _Commands.length - 1){
+                    //do nothing
+                    console.log("No lower commands");
+                }else{
+                    //otherwise, add 1 to cmdListLoc, set the command at that index to the buffer,
+                    //clear the line, and write the buffer
+                    cmdListLoc += 1;
+                    this.buffer = _Commands[cmdListLoc];
+                    this.clearLine();
+                    this.putText(this.buffer);
+                }
+            }
+    
+    
+    
+    
         }
-    }
- }
+     }

@@ -657,7 +657,29 @@ var TSOS;
          * @param args
          */
         shellWrite(args) {
-            _StdOut.putText("LOL I can't write yet");
+            if (args.length > 1) {
+                // set filename to args[0] and str to args[1] to start
+                // this is to read in the filename and data
+                var filename = args[0];
+                var str = args[1];
+                //loop through args to get all of string content into str - separate with spaces
+                for (var i = 2; i < args.length; i++) {
+                    str = str + " " + args[i];
+                }
+                //check if user pur string in double quotes
+                if (str[0] == '"' && str[str.length - 1] == '"') {
+                    //if they did, remove the quotes and call the writefile function in kernel
+                    str = str.substring(1, str.length - 1);
+                    _Kernel.writeFile(filename, str);
+                }
+                else {
+                    //if not - tell them to
+                    _StdOut.putText("String must be in double quotes");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: write <filename> \"string\" Please supply a filename and a string.");
+            }
         }
         /**
          * deeltes file if it exists
