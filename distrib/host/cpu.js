@@ -36,7 +36,7 @@ var TSOS;
             _currPcb.state = "Running";
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
-            console.log("CURRENT: " + _currPcb.PID);
+            //console.log("CURRENT: " + _currPcb.PID);
             //fetch the opcode, set it to the IR, and decode it
             var opCode = this.fetch(this.PC);
             this.IR = opCode;
@@ -50,7 +50,6 @@ var TSOS;
         //decode an opcode
         decode(opCode) {
             //find out what the instruction means
-            console.log("current opcode: " + opCode);
             var val;
             var address;
             var hexAddr;

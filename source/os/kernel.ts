@@ -569,7 +569,12 @@
               * @param data 
               */
              public writeFile(filename: string, data: string){
-                 var msg = _krnFileSystem.writeFile(filename, data);
+                var message = _krnFileSystem.writeFile(filename, data);
+                _StdOut.putText(message);
+             }
+
+             public deleteFile(filename: string){
+                 var msg = _krnFileSystem.deleteFile(filename);
                  _StdOut.putText(msg);
              }
 
