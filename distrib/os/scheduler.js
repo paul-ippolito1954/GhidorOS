@@ -14,17 +14,6 @@ var TSOS;
         init() {
         }
         getNewProc() {
-            //if resident queue has items in it
-            /*if (_ResidentQueue.getSize() > 0){
-                //take the first item off the resident queue and make it the current pcb
-                _currPcb = _ResidentQueue.dequeue();
-                _currPcb.state = "Running";
-            //otherwise
-            }else{
-                //the the first item off the ready queue and make it pcb
-                _currPcb = _ReadyQueue.dequeue();
-                _currPcb.state = "Running";
-            }*/
             _currPcb = _ReadyQueue.dequeue();
             _currPcb.state = "Running";
         }
@@ -36,29 +25,68 @@ var TSOS;
             _CPU.Yreg = _currPcb.Yreg;
             _CPU.Zflag = _currPcb.Zflag;
         }
+        /**
+         * checks what current scheduler
+         * is and executes program accordingly
+         */
         schedule() {
+            if (_ReadyQueue.getSize() > 0) {
+                if (_schedule == "rr") {
+                    this.roundRobin();
+                }
+                else if (_schedule == "fcfs") {
+                    this.fcfs();
+                }
+                else {
+                    this.priority();
+                }
+            }
+        }
+        /**
+         * Executes using Round Robin
+         */
+        roundRobin() {
             //if cpu cycles = quantum.. switch the process
             if (_ReadyQueue.getSize() > 0) {
                 if (cpuCycles >= this.quantum) {
                     console.log("New process");
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, _currPcb));
-                    //switch the process
-                    /*_currPcb.state = "Ready";
-                    TSOS.Control.updatePCBTable(_currPcb.PID,
-                                                _currPcb.state,
-                                                _currPcb.PC,
-                                                _currPcb.IR,
-                                                _currPcb.Acc.toString(16).toUpperCase(),
-                                                _currPcb.Xreg.toString(16).toUpperCase(),
-                                                _currPcb.Yreg.toString(16).toUpperCase(),
-                                                _currPcb.Zflag.toString(16).toUpperCase());
-                    _ReadyQueue.enqueue(_currPcb);
-                    cpuCycles = 0;
-                    this.getNewProc();
-                    this.setCPU();*/
                 }
                 else {
                     console.log("same process");
+                }
+            }
+        }
+        /**
+         * Does FCFS scheduling
+         */
+        fcfs() {
+            // since round robin degrades to fcfs anyway, set the quantum high
+            // I SERIOUSLY doubt there's a process that takes 1000000 cycles....
+            this.quantum = 1000000;
+            if (_ReadyQueue.getSize() > 0) {
+                if (cpuCycles >= this.quantum) {
+                    console.log("New process");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, _currPcb));
+                }
+                else {
+                    console.log("same process");
+                }
+            }
+        }
+        /**
+         * Executes using non-preemptive priority scheduling
+         */
+        priority() {
+            // why not? the switch is based on the priority
+            this.quantum = 1000000;
+            if (_ReadyQueue.getSize() > 0) {
+                if (cpuCycles >= this.quantum) {
+                    console.log("New Process");
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, _currPcb));
+                }
+                else {
+                    console.log("Same process");
                 }
             }
         }

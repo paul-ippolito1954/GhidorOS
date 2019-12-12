@@ -742,7 +742,7 @@ var TSOS;
             }
             else if (algo == "priority") {
                 _schedule = algo;
-                _StdOut.putText("Priority scheduling selected");
+                _StdOut.putText("Non-Preemptive Priority scheduling selected");
             }
             else {
                 _StdOut.putText("setschedule <string>: can be rr, fcfs, or priority. Supply a string");
@@ -757,7 +757,7 @@ var TSOS;
             else if (_schedule == "rr")
                 _StdOut.putText("Scheduling is Round Robin");
             else if (_schedule == "priority")
-                _StdOut.putText("Scheduling is Priority");
+                _StdOut.putText("Scheduling is Non-Preemptive Priority");
         }
     }
     TSOS.Shell = Shell;
