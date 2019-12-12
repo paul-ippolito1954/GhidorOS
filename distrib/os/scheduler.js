@@ -90,6 +90,23 @@ var TSOS;
                 }
             }
         }
+        /**
+         * sort the ready queue by priority, wasn't running properly
+         */
+        sortReadyQueue() {
+            var len = _ReadyQueue.getSize();
+            var tempList = [];
+            // add elements of ready queue to tempList
+            for (var i = 0; i < len; i++) {
+                tempList[i] = _ReadyQueue.dequeue();
+            }
+            // sort templist by priority using sort function
+            tempList.sort((a, b) => a.priority - b.priority);
+            // add the elements of tempList back into readyqueue
+            for (var l = 0; l < len; l++) {
+                _ReadyQueue.enqueue(tempList[l]);
+            }
+        }
         updateWaitAndTurnaround() {
             var readyLength = _ReadyQueue.getSize();
             for (var i = 0; i < readyLength; i++) {
