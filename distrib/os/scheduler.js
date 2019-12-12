@@ -92,6 +92,7 @@ var TSOS;
         }
         /**
          * sort the ready queue by priority, wasn't running properly
+         * before
          */
         sortReadyQueue() {
             var len = _ReadyQueue.getSize();

@@ -329,10 +329,14 @@ var TSOS;
                 return "File name does not exist.";
             }
         }
-        //format first four bits of each block
+        /**
+         * Formats the first 4 bits of each block
+         */
         formatQuick() {
         }
-        //format entirety of each block
+        /**
+         * Formats all all bits of each block
+         */
         formatFull() {
         }
         //check if filename exists

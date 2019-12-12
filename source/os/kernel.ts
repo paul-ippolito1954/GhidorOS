@@ -341,90 +341,93 @@
     
                 var temp;
 
-            if (loc == "current"){
+                if (loc == "current"){
 
-                _StdOut.advanceLine();
-                _StdOut.putText("PID: " + _currPcb.PID);
-                _StdOut.advanceLine();
-                _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
-                _StdOut.advanceLine();
-                _StdOut.putText("Wait Time: " + _currPcb.waittime);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("PID: " + _currPcb.PID);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Wait Time: " + _currPcb.waittime);
 
-                //advance line and put prompt
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                    //advance line and put prompt
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
 
-                _currPcb.state = "Terminated";
+                    _currPcb.state = "Terminated";
 
-                //reset cpu cycles
-                cpuCycles = 0;
-
-
-                //reset main mem using base
-                var base = _currPcb.base;
-                for (var j = base; j < base + 255; j++) {
-                    _Memory.memArray[j] = "00";
-                }
+                    //reset cpu cycles
+                    cpuCycles = 0;
 
 
-                if (_ReadyQueue.getSize() > 0){
-
-                    _currPcb = _ReadyQueue.dequeue();
-                    _CPU.PC = _currPcb.PC;
-                    _CPU.IR = _currPcb.IR;
-                    _CPU.Acc = _currPcb.Acc;
-                    _CPU.Xreg = _currPcb.Xreg;
-                    _CPU.Yreg = _currPcb.Yreg;
-                    _CPU.Zflag = _currPcb.Zflag;
-
-                }else{
-
-                    _CPU.isExecuting = false;
-                    _currPcb.init();
-                    _CPU.init();
-
-                    _CPU.PC = 0;
-                    _CPU.IR = "-";
-                    _CPU.Acc = 0;
-                    _CPU.Xreg = 0;
-                    _CPU.Yreg = 0;
-                    _CPU.Zflag = 0;
-
-
-
-                }
-
-                TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
-
-            }else if (loc == "resident"){
-
-                for (var i = 0; i < _ResidentQueue.getSize(); i++){
-                    temp = _ResidentQueue.dequeue();
-                    if (pid == temp.PID){
-                        break;
-                    }else{
-                        _ResidentQueue.enqueue(temp);
+                    //reset main mem using base
+                    var base = _currPcb.base;
+                    for (var j = base; j < base + 255; j++) {
+                        _Memory.memArray[j] = "00";
                     }
+
+
+                    if (_ReadyQueue.getSize() > 0){
+
+                        _currPcb = _ReadyQueue.dequeue();
+                        _CPU.PC = _currPcb.PC;
+                        _CPU.IR = _currPcb.IR;
+                        _CPU.Acc = _currPcb.Acc;
+                        _CPU.Xreg = _currPcb.Xreg;
+                        _CPU.Yreg = _currPcb.Yreg;
+                        _CPU.Zflag = _currPcb.Zflag;
+
+                    }
+                    else{
+
+                        _CPU.isExecuting = false;
+                        _currPcb.init();
+                        _CPU.init();
+
+                        _CPU.PC = 0;
+                        _CPU.IR = "-";
+                        _CPU.Acc = 0;
+                        _CPU.Xreg = 0;
+                        _CPU.Yreg = 0;
+                        _CPU.Zflag = 0;
+
+
+
+                    }
+
+                    TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
+
                 }
+                    else if (loc == "resident"){
+
+                    for (var i = 0; i < _ResidentQueue.getSize(); i++){
+                        temp = _ResidentQueue.dequeue();
+                        if (pid == temp.PID){
+                            break;
+                        }
+                        else{
+                            _ResidentQueue.enqueue(temp);
+                        }
+                    }
 
 
-                temp.state = "Terminated";
+                    temp.state = "Terminated";
 
-                _StdOut.advanceLine();
-                _StdOut.putText("PID: " + temp.PID);
-                _StdOut.advanceLine();
-                _StdOut.putText("Turnaround Time: " + temp.turnaround);
-                _StdOut.advanceLine();
-                _StdOut.putText("Wait Time: " + temp.waittime);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("PID: " + temp.PID);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Turnaround Time: " + temp.turnaround);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Wait Time: " + temp.waittime);
 
-                //advance line and put prompt
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                    //advance line and put prompt
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
 
 
-                //reset main mem or disk using base
-                base = temp.base;
-                if (base == -1){
+                    //reset main mem or disk using base
+                    base = temp.base;
+                    if (base == -1){
                     //get filename based on pid
                     var filename = "process:" + temp.PID;
 
@@ -436,7 +439,8 @@
                     var block = JSON.parse(sessionStorage.getItem(tsb));
                     block = _krnFileSystem.clearLine(tsb);
                     sessionStorage.setItem(tsb, JSON.stringify(block));
-                }else{
+                }
+                else{
                     for (var j = base; j < base + 255; j++) {
                         _Memory.memArray[j] = "00";
                     }
@@ -490,7 +494,7 @@
 
             }
     
-            }
+        }
     
     
             public clearMemory(){
