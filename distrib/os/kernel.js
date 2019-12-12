@@ -2,9 +2,12 @@
 ///<reference path="queue.ts" />
 /* ------------
      Kernel.ts
+
      Requires globals.ts
               queue.ts
+
      Routines for the Operating System, NOT the host.
+
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
@@ -31,13 +34,12 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
-            //Load the File System
+            //
+            //file system
             this.krnTrace("Loading the file system device driver.");
             _krnFileSystem = new TSOS.DeviceDriverFileSystem();
             _krnFileSystem.driverEntry();
             this.krnTrace(_krnFileSystem.status);
-            //
-            // ... more?
             //
             //memory manager
             _MemoryManager = new TSOS.MemoryManager();
@@ -47,6 +49,8 @@ var TSOS;
             _Memory.init();
             _MemoryAccessor = new TSOS.MemoryAccessor();
             _Scheduler = new TSOS.Scheduler();
+            //swapper
+            _Swapper = new TSOS.Swapper();
             //pcb setting in bootstrap
             _currPcb = new TSOS.ProcessControlBlock("-", 0, "-", 0, "-", 0, 0, 0, "-", 0, 0, 0, 0);
             _ResidentQueue = new TSOS.Queue();
@@ -92,13 +96,14 @@ var TSOS;
                 //console.log("In kernel in cycle curr pcb pid: " + _currPcb.PID)
                 _CPU.cycle();
                 if (runall == true) {
-                    _Scheduler.schedule();
+                    if (_ReadyQueue.getSize() > 0) {
+                        _Scheduler.schedule();
+                    }
                     _Scheduler.updateWaitAndTurnaround();
                 }
             }
-            else { // If there are no interrupts and there is nothing being executed then just be idle. {
-                this.krnTrace("Idle");
-            }
+            // If there are no interrupts and there is nothing being executed then just be idle.
+            this.krnTrace("Idle");
             TSOS.Control.createMemoryTable();
             TSOS.Control.updatePCBTable();
             TSOS.Control.loadDiskTable();
@@ -226,6 +231,9 @@ var TSOS;
             }
             //set runall to true
             runall = true;
+            if (_schedule == "priority") {
+                _Scheduler.sortReadyQueue();
+            }
             //take the first pcb off the ready queue and set it to _currPcb
             _currPcb = _ReadyQueue.dequeue();
             //console.log("IN kernel - curr PCB:" + _currPcb.PID);
@@ -420,24 +428,28 @@ var TSOS;
             }
         }
         contextSwitch() {
+            //console.log("in context switch");
             if (_ReadyQueue.getSize() > 0) {
                 _currPcb.state = "Ready";
-                var temPcb = _currPcb;
+                var tempPcb = _currPcb;
                 cpuCycles = 0;
                 _Scheduler.getNewProc();
                 if (_currPcb.base == -1) {
-                    //SWAP IT OUT
-                    //Call swapProcess with temp base
-                    _Swapper.swapProcesses(temPcb.PID, temPcb.base);
-                    _currPcb.base = temPcb.base;
+                    //must be swapped out
+                    //call swap process with temp base
+                    _Swapper.swapProcesses(tempPcb.PID, tempPcb.base);
+                    _currPcb.base = tempPcb.base;
                     _currPcb.location = "Memory";
-                    temPcb.base = -1;
-                    temPcb.location = "Disk";
+                    tempPcb.base = -1;
+                    tempPcb.location = "Disk";
                 }
-                _ReadyQueue.enqueue(temPcb);
+                //console.log("Adding last pcb onto ready queue: " + tempPcb.PID);
+                _ReadyQueue.enqueue(tempPcb);
+                //console.log("current pcb after get new proc: " + _currPcb.PID);
                 _Scheduler.setCPU();
             }
         }
+        //load a process to the disk
         loadProcessToDisk(pid, userProgram, priority) {
             //call load process to disk from file system driver
             var outcome = _krnFileSystem.loadProcessToDisk(pid, userProgram);
@@ -450,68 +462,47 @@ var TSOS;
                 _StdOut.putText(outcome);
             }
         }
-        /**
-         * Beyond here are the File modification methods
-         * All these do is call the device driver's methods
-         * and log the message to console and shell
-         */
-        /**
-         * Create file
-         * @param filename
-         */
+        //
+        //file modification functions
+        //calls functions in file system device driver and prints out the response to the console
+        //
+        //create a file on the disk
         createFile(filename) {
-            var msg = _krnFileSystem.createFile(filename);
-            _StdOut.putText(msg);
+            var message = _krnFileSystem.createFile(filename);
+            _StdOut.putText(message);
         }
-        /**
-         * Calls writeFile in disk device driver
-         * @param filename
-         * @param data
-         */
+        //write to a file on the disk
         writeFile(filename, data) {
             var message = _krnFileSystem.writeFile(filename, data);
             _StdOut.putText(message);
         }
-        /**
-         * deletes file
-         * @param filename
-         */
-        deleteFile(filename) {
-            var msg = _krnFileSystem.deleteFile(filename);
-            _StdOut.putText(msg);
-        }
-        /**
-         * reads content of file
-         * @param filename
-         */
+        //read a file on the disk
         readFile(filename) {
-            var msg = _krnFileSystem.readFile(filename);
-            _StdOut.putText(msg);
+            var message = _krnFileSystem.readFile(filename);
+            _StdOut.putText(message);
         }
-        /**
-         * List files
-         * @param listType
-         */
+        //delete a file from the disk
+        deleteFile(filename) {
+            var message = _krnFileSystem.deleteFile(filename);
+            _StdOut.putText(message);
+        }
+        //format the disk pointer bits and available bits
+        formatQuick() {
+            var message = _krnFileSystem.formatQuick();
+            _StdOut.putText(message);
+        }
+        //format entire disk
+        formatFull() {
+            var message = _krnFileSystem.formatFull();
+            _StdOut.putText(message);
+        }
+        //list all files on disk
         listFiles(listType) {
             var filenames = _krnFileSystem.listFiles(listType);
             for (var i = 0; i < filenames.length; i++) {
                 _StdOut.putText(filenames[i]);
                 _StdOut.advanceLine();
             }
-        }
-        /**
-         * formats the files with the quick method
-         */
-        formatQuick() {
-            var msg = _krnFileSystem.formatQuick();
-            _StdOut.putText(msg);
-        }
-        /**
-         * formats the disk full
-         */
-        formatFull() {
-            var msg = _krnFileSystem.formatFull();
-            _StdOut.putText(msg);
         }
         //
         // OS Utility Routines

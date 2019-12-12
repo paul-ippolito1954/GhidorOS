@@ -3,9 +3,12 @@
 
 /* ------------
      Kernel.ts
+
      Requires globals.ts
               queue.ts
+
      Routines for the Operating System, NOT the host.
+
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
@@ -37,15 +40,13 @@
                 _krnKeyboardDriver = new DeviceDriverKeyboard();     // Construct it.
                 _krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
                 this.krnTrace(_krnKeyboardDriver.status);
-
-                //Load the File System
+    
+                //
+                //file system
                 this.krnTrace("Loading the file system device driver.");
                 _krnFileSystem = new DeviceDriverFileSystem();
                 _krnFileSystem.driverEntry();
                 this.krnTrace(_krnFileSystem.status);
-    
-                //
-                // ... more?
                 //
                 //memory manager
                 _MemoryManager	=	new	MemoryManager();
@@ -55,6 +56,9 @@
                 _Memory.init();
                 _MemoryAccessor	=	new	MemoryAccessor();
                 _Scheduler	=	new	Scheduler();
+    
+                //swapper
+                _Swapper = new Swapper();
     
     
                 //pcb setting in bootstrap
@@ -108,21 +112,24 @@
                     this.krnInterruptHandler(interrupt.irq, interrupt.params);
                 } else if (_CPU.isExecuting) {// If there are no interrupts then run one CPU cycle if there is anything being processed. {
                     //console.log("In kernel in cycle curr pcb pid: " + _currPcb.PID)
-                   
+                    
                         _CPU.cycle();
                         if (runall == true){
-                            _Scheduler.schedule();
-                            _Scheduler.updateWaitAndTurnaround()
+                            if (_ReadyQueue.getSize() > 0){
+                                _Scheduler.schedule();
+                            }
+                            _Scheduler.updateWaitAndTurnaround();
                         }
-                    
+                    }
     
-                } else {                      // If there are no interrupts and there is nothing being executed then just be idle. {
+                    // If there are no interrupts and there is nothing being executed then just be idle.
                     this.krnTrace("Idle");
-                }
+                
     
                 TSOS.Control.createMemoryTable();
                 TSOS.Control.updatePCBTable();
                 TSOS.Control.loadDiskTable();
+    
             }
     
     
@@ -205,25 +212,24 @@
             //create a new process
             public createProcess(base: number, priority: number){
     
-                
-            if (base == -1){
-                //create a new process control block based on base of program in disk
-                var newProcess = new ProcessControlBlock(_Pid.toString(), base, "Resident", 0, "-", 0, 0, priority, "Disk", 0, 0, 0, 0);
-            }else{
-                //create a new process control block based on base of program in memory
-                var newProcess = new ProcessControlBlock(_Pid.toString(), base, "Resident", 0, "-", 0, 0, priority, "Memory", 0, 0, 0, 0);
-            }
-
-            //update pid
-            _Pid++;
-
-            //add new process to resident queue
-            _ResidentQueue.enqueue(newProcess);
-
-            //print to test
-            for (var i = 0; i < _ResidentQueue.getSize(); i++){
-                console.log(_ResidentQueue.q[i]);
-            }
+                if (base == -1){
+                    //create a new process control block based on base of program in disk
+                    var newProcess = new ProcessControlBlock(_Pid.toString(), base, "Resident", 0, "-", 0, 0, priority, "Disk", 0, 0, 0, 0);
+                }else{
+                    //create a new process control block based on base of program in memory
+                    var newProcess = new ProcessControlBlock(_Pid.toString(), base, "Resident", 0, "-", 0, 0, priority, "Memory", 0, 0, 0, 0);
+                }
+    
+                //update pid
+                _Pid++;
+    
+                //add new process to resident queue
+                _ResidentQueue.enqueue(newProcess);
+    
+                //print to test
+                for (var i = 0; i < _ResidentQueue.getSize(); i++){
+                    console.log(_ResidentQueue.q[i]);
+                }
             }
     
             //execute a specified process
@@ -266,6 +272,10 @@
     
                 //set runall to true
                 runall = true;
+    
+                if (_schedule == "priority"){
+                    _Scheduler.sortReadyQueue();
+                }
                 //take the first pcb off the ready queue and set it to _currPcb
                 _currPcb = _ReadyQueue.dequeue();
                 //console.log("IN kernel - curr PCB:" + _currPcb.PID);
@@ -277,98 +287,98 @@
             //exit a process
             public exitProcess(pid:string){
                 console.log("Process exited: " + pid);
-
-            _StdOut.advanceLine();
-            _StdOut.putText("Process: " + pid);
-            _StdOut.advanceLine();
-            _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
-            _StdOut.advanceLine();
-            _StdOut.putText("Wait Time: " + _currPcb.waittime);
-
-            //advance line and put prompt
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
-
-            //set state to terminated and executing to false
-            _currPcb.state = "Terminated";
-
-            //reset clock cycles
-            cpuCycles = 0;
-
-            //reset main mem using base
-            var base = _currPcb.base;
-            //console.log("In exit: " + _currPcb.base);
-            for (var j = base; j < base + 255; j++) {
-                _Memory.memArray[j] = "00";
-            }
-
-            if (_ReadyQueue.isEmpty()){
-                _CPU.isExecuting = false;
-                _CPU.PC = 0;
-                _CPU.IR = "-";
-                _CPU.Acc = 0;
-                _CPU.Xreg = 0;
-                _CPU.Yreg = 0;
-                _CPU.Zflag = 0;
-                _currPcb.init();
-            }else{
-                //console.log("switching curr pcb in exit process");
-                _currPcb = _ReadyQueue.dequeue();
-                //console.log("ReadyQueue size: " + _ReadyQueue.getSize());
-                if (_currPcb.base == -1){
-                    var newBase = _Swapper.swapIn();
-                    _currPcb.base = newBase;
-                    _currPcb.location = "Memory";
-
+    
+                _StdOut.advanceLine();
+                _StdOut.putText("Process: " + pid);
+                _StdOut.advanceLine();
+                _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
+                _StdOut.advanceLine();
+                _StdOut.putText("Wait Time: " + _currPcb.waittime);
+    
+                //advance line and put prompt
+                _StdOut.advanceLine();
+                _OsShell.putPrompt();
+    
+                //set state to terminated and executing to false
+                _currPcb.state = "Terminated";
+    
+                //reset clock cycles
+                cpuCycles = 0;
+    
+                //reset main mem using base
+                var base = _currPcb.base;
+                //console.log("In exit: " + _currPcb.base);
+                for (var j = base; j < base + 255; j++) {
+                    _Memory.memArray[j] = "00";
                 }
-                _CPU.PC = _currPcb.PC;
-                _CPU.IR = _currPcb.IR;
-                _CPU.Acc = _currPcb.Acc;
-                _CPU.Xreg = _currPcb.Xreg;
-                _CPU.Yreg = _currPcb.Yreg;
-                _CPU.Zflag = _currPcb.Zflag;
-            }
-
-            TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
-
-            for (var i = 0; i < _ReadyQueue.getSize(); i++){
-                console.log(_ReadyQueue.q[i]);
-            }
+    
+                if (_ReadyQueue.isEmpty()){
+                    _CPU.isExecuting = false;
+                    _CPU.PC = 0;
+                    _CPU.IR = "-";
+                    _CPU.Acc = 0;
+                    _CPU.Xreg = 0;
+                    _CPU.Yreg = 0;
+                    _CPU.Zflag = 0;
+                    _currPcb.init();
+                }else{
+                    //console.log("switching curr pcb in exit process");
+                    _currPcb = _ReadyQueue.dequeue();
+                    //console.log("ReadyQueue size: " + _ReadyQueue.getSize());
+                    if (_currPcb.base == -1){
+                        var newBase = _Swapper.swapIn();
+                        _currPcb.base = newBase;
+                        _currPcb.location = "Memory";
+    
+                    }
+                    _CPU.PC = _currPcb.PC;
+                    _CPU.IR = _currPcb.IR;
+                    _CPU.Acc = _currPcb.Acc;
+                    _CPU.Xreg = _currPcb.Xreg;
+                    _CPU.Yreg = _currPcb.Yreg;
+                    _CPU.Zflag = _currPcb.Zflag;
+                }
+    
+                TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
+    
+                for (var i = 0; i < _ReadyQueue.getSize(); i++){
+                    console.log(_ReadyQueue.q[i]);
+                }
     
             }
     
             public killProcess(pid: number, loc: string){
     
                 var temp;
-
+    
                 if (loc == "current"){
-
+    
                     _StdOut.advanceLine();
                     _StdOut.putText("PID: " + _currPcb.PID);
                     _StdOut.advanceLine();
                     _StdOut.putText("Turnaround Time: " + _currPcb.turnaround);
                     _StdOut.advanceLine();
                     _StdOut.putText("Wait Time: " + _currPcb.waittime);
-
+    
                     //advance line and put prompt
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
-
+    
                     _currPcb.state = "Terminated";
-
+    
                     //reset cpu cycles
                     cpuCycles = 0;
-
-
+    
+    
                     //reset main mem using base
                     var base = _currPcb.base;
                     for (var j = base; j < base + 255; j++) {
                         _Memory.memArray[j] = "00";
                     }
-
-
+    
+    
                     if (_ReadyQueue.getSize() > 0){
-
+    
                         _currPcb = _ReadyQueue.dequeue();
                         _CPU.PC = _currPcb.PC;
                         _CPU.IR = _currPcb.IR;
@@ -376,169 +386,167 @@
                         _CPU.Xreg = _currPcb.Xreg;
                         _CPU.Yreg = _currPcb.Yreg;
                         _CPU.Zflag = _currPcb.Zflag;
-
-                    }
-                    else{
-
+    
+                    }else{
+    
                         _CPU.isExecuting = false;
                         _currPcb.init();
                         _CPU.init();
-
+    
                         _CPU.PC = 0;
                         _CPU.IR = "-";
                         _CPU.Acc = 0;
                         _CPU.Xreg = 0;
                         _CPU.Yreg = 0;
                         _CPU.Zflag = 0;
-
-
-
+    
+    
+    
                     }
-
+    
                     TSOS.Control.updateCPUTable(_CPU.PC, _CPU.IR, _CPU.Acc, _CPU.Xreg, _CPU.Yreg, _CPU.Zflag);
-
-                }
-                    else if (loc == "resident"){
-
+    
+                }else if (loc == "resident"){
+    
                     for (var i = 0; i < _ResidentQueue.getSize(); i++){
                         temp = _ResidentQueue.dequeue();
                         if (pid == temp.PID){
                             break;
-                        }
-                        else{
+                        }else{
                             _ResidentQueue.enqueue(temp);
                         }
                     }
-
-
+    
+    
                     temp.state = "Terminated";
-
+    
                     _StdOut.advanceLine();
                     _StdOut.putText("PID: " + temp.PID);
                     _StdOut.advanceLine();
                     _StdOut.putText("Turnaround Time: " + temp.turnaround);
                     _StdOut.advanceLine();
                     _StdOut.putText("Wait Time: " + temp.waittime);
-
+    
                     //advance line and put prompt
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
-
-
+    
+    
                     //reset main mem or disk using base
                     base = temp.base;
                     if (base == -1){
-                    //get filename based on pid
-                    var filename = "process:" + temp.PID;
-
-                    //gets program and clears lines along the way
-                    var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
-
-                    //clear the filename line
-                    var tsb = _krnFileSystem.getTsb(filename);
-                    var block = JSON.parse(sessionStorage.getItem(tsb));
-                    block = _krnFileSystem.clearLine(tsb);
-                    sessionStorage.setItem(tsb, JSON.stringify(block));
-                }
-                else{
-                    for (var j = base; j < base + 255; j++) {
-                        _Memory.memArray[j] = "00";
-                    }
-                }
-
-
-            }else if (loc == "ready"){
-
-                for (var i = 0; i < _ReadyQueue.getSize(); i++){
-                    temp = _ReadyQueue.dequeue();
-                    if (pid == temp.PID){
-                        break;
-                    }else{
-                        _ReadyQueue.enqueue(temp);
-                    }
-                }
-
-                temp.state = "Terminated";
-
-                _StdOut.advanceLine();
-                _StdOut.putText("PID: " + temp.PID);
-                _StdOut.advanceLine();
-                _StdOut.putText("Turnaround Time: " + temp.turnaround);
-                _StdOut.advanceLine();
-                _StdOut.putText("Wait Time: " + temp.waittime);
-
-                //advance line and put prompt
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
-
-
-                //reset main mem or disk using base
-                base = temp.base;
-                if (base == -1){
-                    //get filename based on pid
-                    var filename = "process:" + temp.PID;
-
-                    //gets program and clears lines along the way
-                    var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
-
-                    //clear the filename line
-                    var tsb = _krnFileSystem.getTsb(filename);
-                    var block = JSON.parse(sessionStorage.getItem(tsb));
-                    block = _krnFileSystem.clearLine(tsb);
-                    sessionStorage.setItem(tsb, JSON.stringify(block));
-                }else{
-                    for (var j = base; j < base + 255; j++) {
-                        _Memory.memArray[j] = "00";
-                    }
-                }
-
-            }
+                        //get filename based on pid
+                        var filename = "process:" + temp.PID;
     
-        }
+                        //gets program and clears lines along the way
+                        var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
+    
+                        //clear the filename line
+                        var tsb = _krnFileSystem.getTsb(filename);
+                        var block = JSON.parse(sessionStorage.getItem(tsb));
+                        block = _krnFileSystem.clearLine(tsb);
+                        sessionStorage.setItem(tsb, JSON.stringify(block));
+                    }else{
+                        for (var j = base; j < base + 255; j++) {
+                            _Memory.memArray[j] = "00";
+                        }
+                    }
+    
+    
+                }else if (loc == "ready"){
+    
+                    for (var i = 0; i < _ReadyQueue.getSize(); i++){
+                        temp = _ReadyQueue.dequeue();
+                        if (pid == temp.PID){
+                            break;
+                        }else{
+                            _ReadyQueue.enqueue(temp);
+                        }
+                    }
+    
+                    temp.state = "Terminated";
+    
+                    _StdOut.advanceLine();
+                    _StdOut.putText("PID: " + temp.PID);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Turnaround Time: " + temp.turnaround);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Wait Time: " + temp.waittime);
+    
+                    //advance line and put prompt
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
+    
+    
+                    //reset main mem or disk using base
+                    base = temp.base;
+                    if (base == -1){
+                        //get filename based on pid
+                        var filename = "process:" + temp.PID;
+    
+                        //gets program and clears lines along the way
+                        var diskProgram = _krnFileSystem.getProcessFromDisk(filename);
+    
+                        //clear the filename line
+                        var tsb = _krnFileSystem.getTsb(filename);
+                        var block = JSON.parse(sessionStorage.getItem(tsb));
+                        block = _krnFileSystem.clearLine(tsb);
+                        sessionStorage.setItem(tsb, JSON.stringify(block));
+                    }else{
+                        for (var j = base; j < base + 255; j++) {
+                            _Memory.memArray[j] = "00";
+                        }
+                    }
+    
+                }
+    
+            }
     
     
             public clearMemory(){
                 for (var i = 0; i < 768; i++){
                     _Memory.memArray[i] = "00";
                 }
-    
                 var resLen = _ResidentQueue.getSize();
                 var readyLen = _ReadyQueue.getSize();
     
                 for (var i = 0; i < resLen; i++){
                     _ResidentQueue.dequeue();
                 }
-    
                 for (var j = 0; j < readyLen; j++){
                     _ReadyQueue.dequeue();
                 }
             }
     
             public contextSwitch(){
-                
-                if(_ReadyQueue.getSize() > 0){
+                //console.log("in context switch");
+                if (_ReadyQueue.getSize() > 0){
+    
                     _currPcb.state = "Ready";
-                    var temPcb = _currPcb;
+                    var tempPcb = _currPcb;
                     cpuCycles = 0;
                     _Scheduler.getNewProc();
-
-                    if(_currPcb.base == -1){
-                        //SWAP IT OUT
-                        //Call swapProcess with temp base
-                        _Swapper.swapProcesses(temPcb.PID, temPcb.base);
-                        _currPcb.base = temPcb.base;
+                    if (_currPcb.base == -1){
+                        //must be swapped out
+                        //call swap process with temp base
+                        _Swapper.swapProcesses(tempPcb.PID, tempPcb.base);
+                        _currPcb.base = tempPcb.base;
                         _currPcb.location = "Memory";
-                        temPcb.base = -1;
-                        temPcb.location = "Disk";
+                        tempPcb.base = -1;
+                        tempPcb.location = "Disk";
                     }
-
-                    _ReadyQueue.enqueue(temPcb);
+                    //console.log("Adding last pcb onto ready queue: " + tempPcb.PID);
+                    _ReadyQueue.enqueue(tempPcb);
+                    //console.log("current pcb after get new proc: " + _currPcb.PID);
                     _Scheduler.setCPU();
+    
                 }
+    
             }
-
+    
+    
+            //load a process to the disk
             public loadProcessToDisk(pid, userProgram, priority){
-
                 //call load process to disk from file system driver
                 var outcome = _krnFileSystem.loadProcessToDisk(pid, userProgram);
                 //if its successfull create a new process
@@ -551,83 +559,77 @@
     
     
             }
-
-            /**
-             * Beyond here are the File modification methods
-             * All these do is call the device driver's methods
-             * and log the message to console and shell
-             */
     
-             /**
-              * Create file
-              * @param filename 
-              */
-             public createFile(filename: string){
-                 var msg = _krnFileSystem.createFile(filename);
-                 _StdOut.putText(msg);
-             }
-
-             /**
-              * Calls writeFile in disk device driver
-              * @param filename 
-              * @param data 
-              */
-             public writeFile(filename: string, data: string){
+    
+    
+            //
+            //file modification functions
+            //calls functions in file system device driver and prints out the response to the console
+            //
+    
+            //create a file on the disk
+            public createFile(filename: string){
+    
+                var message = _krnFileSystem.createFile(filename);
+                _StdOut.putText(message);
+    
+            }
+    
+            //write to a file on the disk
+            public writeFile(filename: string, data: string){
+    
                 var message = _krnFileSystem.writeFile(filename, data);
                 _StdOut.putText(message);
-             }
-
-             /**
-              * deletes file
-              * @param filename 
-              */
-             public deleteFile(filename: string){
-                 var msg = _krnFileSystem.deleteFile(filename);
-                 _StdOut.putText(msg);
-             }
-
-             /**
-              * reads content of file
-              * @param filename 
-              */
-             public readFile(filename: string){
-                 var msg = _krnFileSystem.readFile(filename);
-                 _StdOut.putText(msg);
-             }
-
-             /**
-              * List files
-              * @param listType 
-              */
-             public listFiles(listType: string){
+    
+            }
+    
+            //read a file on the disk
+            public readFile(filename: string,){
+    
+                var message = _krnFileSystem.readFile(filename);
+                _StdOut.putText(message);
+    
+            }
+    
+            //delete a file from the disk
+            public deleteFile(filename: string){
+    
+                var message = _krnFileSystem.deleteFile(filename);
+                _StdOut.putText(message);
+    
+            }
+    
+            //format the disk pointer bits and available bits
+            public formatQuick(){
+                var message = _krnFileSystem.formatQuick();
+                _StdOut.putText(message);
+    
+            }
+    
+            //format entire disk
+            public formatFull(){
+    
+                var message = _krnFileSystem.formatFull();
+                _StdOut.putText(message);
+    
+            }
+    
+            //list all files on disk
+            public listFiles(listType: string){
+    
+    
                 var filenames = _krnFileSystem.listFiles(listType);
-
+    
                 for (var i = 0; i < filenames.length; i++){
                     _StdOut.putText(filenames[i]);
                     _StdOut.advanceLine();
                 }
-
-             }
-
-             /**
-              * formats the files with the quick method
-              */
-             public formatQuick(){
-                 var msg = _krnFileSystem.formatQuick();
-                 _StdOut.putText(msg);
-             }
-
-
-             /**
-              * formats the disk full
-              */
-             public formatFull(){
-                 var msg = _krnFileSystem.formatFull();
-                 _StdOut.putText(msg);
-             }
-
-
-             
+    
+            }
+    
+    
+    
+    
             //
             // OS Utility Routines
             //
@@ -660,3 +662,4 @@
             }
         }
     }
+    

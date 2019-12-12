@@ -657,7 +657,7 @@ var TSOS;
                 }
             }
             else {
-                //write each part of the process to a bit in the cirrent block
+                //write each part of the process to a bit in the current block
                 for (var a = 0; a < proc.length; a++) {
                     currBlock[a + 4] = proc[a];
                 }
