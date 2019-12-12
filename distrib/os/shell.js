@@ -703,6 +703,7 @@ var TSOS;
         /**
          * formats the file system.
          * Initializes all blocks in all sectors and tracks
+         * If full or quick aren't speciifed, default quick
          */
         shellFormat(args) {
             console.log(args);
@@ -716,10 +717,10 @@ var TSOS;
                     _Kernel.formatFull();
                 }
                 else
-                    _StdOut.putText("Specifiy either -quick or -full");
+                    _StdOut.putText("Specify -quick or -full");
             }
             else {
-                _StdOut.putText("Usage: format -quick or -full to format the disk.");
+                _Kernel.formatQuick();
             }
         }
         /**
