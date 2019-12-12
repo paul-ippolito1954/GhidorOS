@@ -609,6 +609,14 @@
 
              }
 
+             /**
+              * formats the files with the quick method
+              */
+             public formatQuick(){
+                 var msg = _krnFileSystem.formatQuick();
+                 _StdOut.putText(msg);
+             }
+
 
              
             //

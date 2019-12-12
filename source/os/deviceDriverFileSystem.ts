@@ -423,6 +423,26 @@ module TSOS {
          */
         public formatQuick(){
 
+            var diskSize = this.track * this.block * this.sector;
+
+            //check if cpu is executing and dont allow formatting if it is
+            if (_CPU.isExecuting){
+                return "Cannot format disk while CPU is executing.";
+            }
+            else{
+                //loop through disk and set first four bits of each block to zero
+                for (var i = 0; i < diskSize; i++){
+
+                    var tsb = sessionStorage.key(i);
+                    var currBlock = JSON.parse(sessionStorage.getItem(tsb));
+
+                    for (var a = 0; a < 4; a++){
+                        currBlock[a] = "0";
+                    }
+                    sessionStorage.setItem(tsb, JSON.stringify(currBlock));
+                }
+                return "Successfully formatted disk (quick)";
+            }
         }
 
         /**

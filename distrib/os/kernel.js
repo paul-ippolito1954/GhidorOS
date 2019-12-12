@@ -499,6 +499,13 @@ var TSOS;
                 _StdOut.advanceLine();
             }
         }
+        /**
+         * formats the files with the quick method
+         */
+        formatQuick() {
+            var msg = _krnFileSystem.formatQuick();
+            _StdOut.putText(msg);
+        }
         //
         // OS Utility Routines
         //

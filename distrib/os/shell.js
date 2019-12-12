@@ -704,8 +704,20 @@ var TSOS;
          * formats the file system.
          * Initializes all blocks in all sectors and tracks
          */
-        shellFormat() {
-            _StdOut.putText("Format, yes");
+        shellFormat(args) {
+            console.log(args);
+            if (args.length > 0) {
+                var typeFormat = args[0];
+                console.log(typeFormat);
+                if (typeFormat == "-quick") {
+                    _Kernel.formatQuick();
+                }
+                else
+                    _StdOut.putText("it's quick or nothing");
+            }
+            else {
+                _StdOut.putText("Usage: format -quick to format the disk.");
+            }
         }
         /**
          * lists all files, except hidden ones
