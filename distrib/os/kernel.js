@@ -506,6 +506,13 @@ var TSOS;
             var msg = _krnFileSystem.formatQuick();
             _StdOut.putText(msg);
         }
+        /**
+         * formats the disk full
+         */
+        formatFull() {
+            var msg = _krnFileSystem.formatFull();
+            _StdOut.putText(msg);
+        }
         //
         // OS Utility Routines
         //

@@ -897,11 +897,14 @@ module TSOS {
                 if (typeFormat == "-quick"){
                     _Kernel.formatQuick();
                 }
+                else if(typeFormat == "-full"){
+                    _Kernel.formatFull();
+                }
                 else
-                    _StdOut.putText("it's quick or nothing")
+                    _StdOut.putText("Specifiy either -quick or -full")
             }
             else{
-                _StdOut.putText("Usage: format -quick to format the disk.");
+                _StdOut.putText("Usage: format -quick or -full to format the disk.");
             }
         }
 

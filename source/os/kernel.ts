@@ -618,6 +618,15 @@
              }
 
 
+             /**
+              * formats the disk full
+              */
+             public formatFull(){
+                 var msg = _krnFileSystem.formatFull();
+                 _StdOut.putText(msg);
+             }
+
+
              
             //
             // OS Utility Routines

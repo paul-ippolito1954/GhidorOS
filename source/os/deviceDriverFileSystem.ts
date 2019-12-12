@@ -450,9 +450,30 @@ module TSOS {
          */
         public formatFull(){
 
+            var diskSize = this.track * this.sector * this.block;
+
+            //check if cpu is executing and dont allow formatting if it is
+            if (_CPU.isExecuting){
+                return "Cannot format disk while CPU is executing.";
+            }
+            else{
+                //loop through disk and initialize entire block for each block
+                for (var i = 0; i < diskSize; i++){
+                    var tsb = sessionStorage.key(i);
+                    var currBlock = JSON.parse(sessionStorage.getItem(tsb));
+                    currBlock = this.clearLine(tsb);
+                    sessionStorage.setItem(tsb, JSON.stringify(currBlock));
+                }
+
+                return "Successfully formatted disk (full).";
+            }
+
         }
 
-        //check if filename exists
+        /**
+         * Validation, see if filename exists 
+         * @param filename 
+         */
         public fileNameExists(filename){
             //loop through disk and look for matching filename
             for (var i = 0; i < this.track; i++){
@@ -498,7 +519,10 @@ module TSOS {
 
         }
 
-        //convert string to ascii to hex
+        /**
+         * Converts string to ascii then to hex
+         * @param data 
+         */
         public convertToAscii(data){
 
             //create an empty array for the new hex values for each letter
@@ -513,7 +537,10 @@ module TSOS {
             return hexArr;
         }
 
-        //convert hex to ascii to string
+        /**
+         * convert hex to ascii to string
+         * @param hexArr 
+         */
         public convertToString(hexArr){
 
             //create empy string and variable for char
@@ -530,7 +557,9 @@ module TSOS {
 
         }
 
-        //find an available pointer
+        /**
+         * Finds available pointers
+         */
         public getPointer(){
 
             //start pointer section on the second track
